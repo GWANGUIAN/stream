@@ -18,7 +18,7 @@ export const PLATFORM_TERMS: Record<Platform, PlatformTerms> = {
     platform: 'soop',
     currency: '별풍선',
     unit: '개',
-    streamerLabel: 'BJ 아이디',
+    streamerLabel: '스트리머 아이디',
     idPlaceholder: '예: gameng',
     verb: '쐈어요',
   },

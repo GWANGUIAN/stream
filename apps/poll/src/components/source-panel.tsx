@@ -7,7 +7,7 @@ import { useChatConnection } from '@/lib/hooks'
 import type { PollStore } from '@/lib/store'
 
 const PLACEHOLDER: Record<Platform, { label: string; hint: string }> = {
-  soop: { label: 'BJ 아이디', hint: '예: gameng' },
+  soop: { label: '스트리머 아이디', hint: '예: gameng' },
   chzzk: { label: '채널 ID', hint: '예: 32자리 채널 코드' },
 }
 
