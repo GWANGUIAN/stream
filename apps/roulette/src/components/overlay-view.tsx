@@ -11,15 +11,14 @@ import { Wheel } from './wheel'
  */
 export function OverlayView() {
   const snapshot = useOverlaySnapshot()
-  const [toasts, setToasts] = useState<LogEntry[]>([])
+  const [toast, setToast] = useState<LogEntry | null>(null)
   const lastSeenIdRef = useRef<string | null>(null)
   const initializedRef = useRef(false)
+  const hideTimerRef = useRef<number | null>(null)
 
   useEffect(() => {
     if (!snapshot) return
-    const relevant = snapshot.log.filter(
-      (entry) => entry.kind === 'registered' || entry.kind === 'spin',
-    )
+    const relevant = snapshot.log.filter((entry) => entry.kind === 'registered')
 
     // 로그는 최근 N개짜리 링버퍼라 길이가 한도에 도달하면 더 이상 늘어나지 않으므로,
     // 길이 대신 마지막으로 본 id를 기준으로 새 항목을 감지합니다.
@@ -29,19 +28,23 @@ export function OverlayView() {
       return
     }
 
-    const lastSeenIndex = lastSeenIdRef.current
-      ? relevant.findIndex((entry) => entry.id === lastSeenIdRef.current)
-      : -1
-    const fresh = lastSeenIndex === -1 ? relevant : relevant.slice(lastSeenIndex + 1)
-    if (fresh.length === 0) return
+    const latest = relevant.at(-1)
+    if (!latest || latest.id === lastSeenIdRef.current) return
 
-    lastSeenIdRef.current = relevant.at(-1)?.id ?? lastSeenIdRef.current
-    setToasts((prev) => [...prev, ...fresh].slice(-4))
+    lastSeenIdRef.current = latest.id
+    setToast(latest)
 
-    for (const entry of fresh) {
-      window.setTimeout(() => {
-        setToasts((prev) => prev.filter((t) => t.id !== entry.id))
-      }, 6500)
+    if (hideTimerRef.current != null) window.clearTimeout(hideTimerRef.current)
+    hideTimerRef.current = window.setTimeout(() => {
+      setToast((prev) => (prev?.id === latest.id ? null : prev))
+      hideTimerRef.current = null
+    }, 2800)
+
+    return () => {
+      if (hideTimerRef.current != null) {
+        window.clearTimeout(hideTimerRef.current)
+        hideTimerRef.current = null
+      }
     }
   }, [snapshot])
 
@@ -65,13 +68,13 @@ export function OverlayView() {
           maxWidth={560}
         />
       </div>
-      <div className="overlay-toast-stack">
-        {toasts.map((toast) => (
-          <div key={toast.id} className="overlay-toast">
+      {toast && (
+        <div className="overlay-toast-stack" aria-live="polite">
+          <p key={toast.id} className="overlay-log-line">
             {toast.message}
-          </div>
-        ))}
-      </div>
+          </p>
+        </div>
+      )}
     </div>
   )
 }

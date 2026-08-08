@@ -438,7 +438,8 @@ export class RouletteEngine {
     }
 
     this.lastResult = result
-    this.pushLog('spin', `"${winnerSegment.label}" 당첨!`)
+    // 당첨 결과는 스핀 애니메이션이 끝나기 전에 토스트로 노출되면 스포일러가 되므로
+    // 실시간 로그에는 남기지 않습니다. 히스토리·결과 배너로만 확인합니다.
     this.pushHistory('spin', `당첨: ${winnerSegment.label}`)
     this.applyWinnerAction(winnerSegment.itemId)
     this.notify()
