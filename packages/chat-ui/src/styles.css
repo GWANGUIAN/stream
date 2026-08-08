@@ -1,0 +1,52 @@
+.stream-chat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  overflow: auto;
+  font-family: "Pretendard", "Noto Sans KR", sans-serif;
+  color: #f5f5f5;
+}
+
+.stream-chat-list.is-compact {
+  gap: 0.15rem;
+  font-size: 0.9rem;
+}
+
+.stream-chat-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+  line-height: 1.35;
+}
+
+.stream-chat-line.is-donation {
+  color: #ffd166;
+}
+
+.stream-chat-line.is-subscription {
+  color: #7dd3fc;
+}
+
+.stream-chat-line.is-system {
+  opacity: 0.7;
+  font-style: italic;
+}
+
+.stream-platform-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.05rem 0.35rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.stream-chat-nick {
+  font-weight: 700;
+}
+
+.stream-chat-amount {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}

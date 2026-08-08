@@ -1,0 +1,5 @@
+{
+  "extends": "@stream/config/tsconfig/library.json",
+  "include": ["src/**/*.ts", "vitest.config.ts"],
+  "exclude": ["src/**/*.test.ts"]
+}

@@ -1,0 +1,37 @@
+packages:
+  - "packages/*"
+  - "apps/*"
+
+# 워크스페이스 전체에서 버전을 한 곳에 고정합니다.
+# 패키지에서는 "zod": "catalog:" 처럼 참조하세요.
+catalog:
+  "@biomejs/biome": ^2.5.6
+  "@radix-ui/react-label": ^2.1.7
+  "@radix-ui/react-separator": ^1.1.7
+  "@radix-ui/react-slot": ^1.2.3
+  "@tailwindcss/postcss": ^4.1.11
+  "@types/node": ^26.1.2
+  "@types/react": ^19.2.0
+  "@types/react-dom": ^19.2.0
+  "@types/ws": ^8.18.1
+  class-variance-authority: ^0.7.1
+  clsx: ^2.1.1
+  iron-session: ^8.0.4
+  lucide-react: ^0.525.0
+  next: ^16.2.12
+  react: ^19.2.8
+  react-dom: ^19.2.8
+  tailwind-merge: ^3.3.1
+  tailwindcss: ^4.1.11
+  turbo: ^2.10.8
+  typescript: ^7.0.2
+  vitest: ^4.1.10
+  ws: ^8.21.1
+  zod: ^4.4.3
+
+# pnpm 10은 기본적으로 lifecycle script를 차단합니다. 필요한 것만 허용합니다.
+onlyBuiltDependencies:
+  - "@biomejs/biome"
+  - esbuild
+  - sharp
+  - unrs-resolver

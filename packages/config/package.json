@@ -1,0 +1,20 @@
+{
+  "name": "@stream/config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tsconfig/base.json": "./tsconfig/base.json",
+    "./tsconfig/library.json": "./tsconfig/library.json",
+    "./tsconfig/react-library.json": "./tsconfig/react-library.json",
+    "./tsconfig/next.json": "./tsconfig/next.json",
+    "./vitest": "./src/vitest.ts"
+  },
+  "files": [
+    "tsconfig",
+    "src"
+  ],
+  "devDependencies": {
+    "vitest": "catalog:"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "@stream/alerts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "clean": "node -e \"require('node:fs').rmSync('.turbo',{recursive:true,force:true})\""
+  },
+  "dependencies": {
+    "@stream/chat": "workspace:*",
+    "@stream/core": "workspace:*",
+    "@stream/events": "workspace:*"
+  },
+  "devDependencies": {
+    "@stream/config": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

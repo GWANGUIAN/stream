@@ -1,0 +1,129 @@
+.stream-overlay-root {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+  color: #fff;
+  font-family: "Pretendard", "Noto Sans KR", sans-serif;
+  pointer-events: none;
+}
+
+.stream-alert-host {
+  position: absolute;
+  left: 50%;
+  top: 12%;
+  transform: translateX(-50%);
+  min-width: 280px;
+  text-align: center;
+}
+
+.stream-alert-card {
+  padding: 1rem 1.5rem;
+  background: rgba(0, 0, 0, 0.55);
+  animation: stream-alert-in 280ms ease-out;
+}
+
+.stream-alert-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.stream-alert-amount {
+  margin-top: 0.25rem;
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #ffd166;
+}
+
+.stream-alert-subtitle {
+  margin-top: 0.35rem;
+  opacity: 0.9;
+}
+
+.stream-goal-bar {
+  position: absolute;
+  left: 1.5rem;
+  right: 1.5rem;
+  bottom: 1.5rem;
+}
+
+.stream-goal-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.stream-goal-track {
+  height: 0.7rem;
+  background: rgba(255, 255, 255, 0.2);
+  overflow: hidden;
+}
+
+.stream-goal-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00ffa3, #0182ff);
+  transition: width 400ms ease;
+}
+
+.stream-chat-ticker {
+  position: absolute;
+  left: 1rem;
+  bottom: 4rem;
+  width: min(420px, 40vw);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stream-recent-donations {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 180px;
+}
+
+.stream-recent-donation {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.35rem 0.55rem;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.stream-on-air {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  padding: 0.25rem 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.stream-on-air.is-live {
+  background: #e11d48;
+}
+
+.stream-on-air.is-offline {
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0.7;
+}
+
+@keyframes stream-alert-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

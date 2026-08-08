@@ -1,0 +1,32 @@
+{
+  "name": "@stream/overlay",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles.css": "./src/styles.css"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "clean": "node -e \"require('node:fs').rmSync('.turbo',{recursive:true,force:true})\""
+  },
+  "peerDependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "dependencies": {
+    "@stream/alerts": "workspace:*",
+    "@stream/chat-ui": "workspace:*",
+    "@stream/core": "workspace:*",
+    "@stream/goals": "workspace:*"
+  },
+  "devDependencies": {
+    "@stream/config": "workspace:*",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:"
+  }
+}

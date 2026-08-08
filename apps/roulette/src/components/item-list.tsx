@@ -1,0 +1,108 @@
+'use client'
+
+import type { RouletteItem } from '@stream/roulette'
+import { useState } from 'react'
+import type { RouletteStore } from '@/lib/store'
+
+export interface ItemListProps {
+  store: RouletteStore
+  items: RouletteItem[]
+}
+
+export function ItemList({ store, items }: ItemListProps) {
+  const [newLabel, setNewLabel] = useState('')
+  const [newCount, setNewCount] = useState(1)
+
+  function handleAdd() {
+    const label = newLabel.trim()
+    if (!label) return
+    store.engine.addItem(label, Math.max(1, newCount))
+    setNewLabel('')
+    setNewCount(1)
+  }
+
+  return (
+    <section className="glass-panel item-list-panel">
+      <h2 className="glass-panel-title">아이템 목록</h2>
+      <p className="glass-panel-sub">
+        도네이션으로 자동 등록되거나, 여기서 바로 수정할 수 있습니다.
+      </p>
+
+      <div className="field-row">
+        <input
+          value={newLabel}
+          placeholder="아이템 이름"
+          onChange={(e) => setNewLabel(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+        />
+        <input
+          type="number"
+          min={1}
+          value={newCount}
+          style={{ flex: '0 0 4.5rem' }}
+          onChange={(e) => setNewCount(Math.max(1, Number(e.target.value) || 1))}
+        />
+        <button type="button" className="btn btn-primary" onClick={handleAdd}>
+          추가
+        </button>
+      </div>
+
+      <hr className="section-divider" />
+
+      <div className="item-table scroll-thin item-table-tall">
+        {items.length === 0 ? (
+          <div className="item-empty">등록된 아이템이 없습니다.</div>
+        ) : (
+          items.map((item) => (
+            <div key={item.id}>
+              <div className="item-row">
+                <span className="swatch" style={{ background: item.color ?? 'var(--accent)' }} />
+                <input
+                  type="text"
+                  defaultValue={item.label}
+                  onBlur={(e) => store.engine.renameItem(item.id, e.target.value)}
+                />
+                <div className="stepper">
+                  <button
+                    type="button"
+                    onClick={() => store.engine.setItemCount(item.id, item.count - 1)}
+                  >
+                    −
+                  </button>
+                  <span>{item.count}</span>
+                  <button
+                    type="button"
+                    onClick={() => store.engine.setItemCount(item.id, item.count + 1)}
+                  >
+                    +
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-icon btn-ghost"
+                  onClick={() => store.engine.removeItem(item.id)}
+                >
+                  ✕
+                </button>
+              </div>
+              {item.contributors.length > 0 && (
+                <div className="contributors">기여: {item.contributors.slice(-4).join(', ')}</div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+
+      <div className="field-row" style={{ marginTop: '0.8rem' }}>
+        <button
+          type="button"
+          className="btn btn-sm btn-block"
+          disabled={!store.engine.canUndo()}
+          onClick={() => store.engine.undo()}
+        >
+          ↶ 실행 취소
+        </button>
+      </div>
+    </section>
+  )
+}

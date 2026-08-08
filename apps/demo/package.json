@@ -1,0 +1,36 @@
+{
+  "name": "@stream/demo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --port 3000 --webpack",
+    "build": "next build",
+    "start": "next start --port 3000",
+    "typecheck": "tsc --noEmit",
+    "clean": "node -e \"const fs=require('node:fs'); for (const p of ['.next','.turbo']) fs.rmSync(p,{recursive:true,force:true})\""
+  },
+  "dependencies": {
+    "@stream/api": "workspace:*",
+    "@stream/auth": "workspace:*",
+    "@stream/chat": "workspace:*",
+    "@stream/chat-ui": "workspace:*",
+    "@stream/core": "workspace:*",
+    "@stream/events": "workspace:*",
+    "@stream/sse": "workspace:*",
+    "@stream/ui": "workspace:*",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@stream/config": "workspace:*",
+    "@tailwindcss/postcss": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:"
+  }
+}
