@@ -1,6 +1,6 @@
 import type { NextConfig } from 'next'
 
-// GitHub Pages 등 정적 호스팅용 빌드일 때만 켭니다. 일반 dev/Node 빌드에는 영향 없음.
+// 정적 호스팅 빌드일 때만 켭니다. Pages는 CI에서 /stream/roulette, AWS는 /roulette.
 const isStaticExport = process.env.NEXT_PUBLIC_STATIC_EXPORT === 'true'
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
 

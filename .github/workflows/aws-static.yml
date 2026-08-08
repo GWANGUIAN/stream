@@ -1,0 +1,86 @@
+# AWS(S3 + CloudFront) 정적 배포. GitHub Pages 워크플로와 병행됩니다.
+# 사전 준비: infra/ 에서 terraform apply 후 아래 Secrets/Variables 등록.
+#   Secrets:   AWS_DEPLOY_ROLE_ARN
+#   Variables: AWS_REGION, AWS_S3_BUCKET, AWS_CLOUDFRONT_DISTRIBUTION_ID
+name: Deploy AWS Static
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: aws-static
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: aws-static
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # custom domain 루트 배포: /stream 접두사 없이 앱 경로만 사용합니다.
+      - name: Build roulette (static export)
+        working-directory: apps/roulette
+        env:
+          NEXT_PUBLIC_BASE_PATH: /roulette
+        run: pnpm run build:pages
+
+      - name: Build poll (static export)
+        working-directory: apps/poll
+        env:
+          NEXT_PUBLIC_BASE_PATH: /poll
+        run: pnpm run build:pages
+
+      - name: Build sentence (static export)
+        working-directory: apps/sentence
+        env:
+          NEXT_PUBLIC_BASE_PATH: /sentence
+        run: pnpm run build:pages
+
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          cp -r apps/roulette/out _site/roulette
+          cp -r apps/poll/out _site/poll
+          cp -r apps/sentence/out _site/sentence
+          node .github/pages/build-index.mjs _site
+          # CloudFront 403/404 매핑용 최소 페이지
+          printf '%s\n' \
+            '<!doctype html>' \
+            '<html lang="ko"><head><meta charset="utf-8"/><title>Not found</title></head>' \
+            '<body><p>Page not found. <a href="/">Home</a></p></body></html>' \
+            > _site/404.html
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Sync to S3
+        run: aws s3 sync _site "s3://${{ vars.AWS_S3_BUCKET }}" --delete
+
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ vars.AWS_CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths "/*"

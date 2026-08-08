@@ -206,13 +206,19 @@ nonce를 httpOnly 쿠키에 심고 콜백에서 쿠키로 검증합니다.
 
 Private. 비공식 API 사용은 각 플랫폼 이용약관을 확인한 뒤 본인 책임하에 하세요.
 
-## 구현된 프로젝트 (GitHub Pages)
+## 구현된 프로젝트 (정적 호스팅)
 
-랜딩: [https://gwanguian.github.io/stream/](https://gwanguian.github.io/stream/)
+두 채널로 **병행** 배포됩니다.
 
-| 프로젝트 | 설명 | 주소 |
+| 채널 | 랜딩 | 비고 |
 | --- | --- | --- |
-| 도네이션 랜덤 룰렛 | SOOP · 치지직 도네이션으로 아이템이 등록되는 방송용 랜덤 룰렛. 조작 페이지와 OBS 투명 오버레이 포함. | [https://gwanguian.github.io/stream/roulette/](https://gwanguian.github.io/stream/roulette/) |
-| 채팅 투표 | SOOP · 치지직 채팅(`!투표 N`)으로 진행하는 방송용 실시간 투표. 타이머·결과 공개·오버레이 포함. | [https://gwanguian.github.io/stream/poll/](https://gwanguian.github.io/stream/poll/) |
+| AWS (`streamcontent.click`) | [https://streamcontent.click/](https://streamcontent.click/) | S3 + CloudFront. 인프라·자격 증명·첫 배포는 [`infra/README.md`](infra/README.md) |
+| GitHub Pages | [https://gwanguian.github.io/stream/](https://gwanguian.github.io/stream/) | 경로에 `/stream` 접두사 |
 
-> GitHub Pages는 Settings → Pages → Source를 **GitHub Actions**로 켠 뒤, `main` 푸시 시 Actions로 배포됩니다. 정적 호스팅이라 로컬 `pnpm dev`의 채팅 SSE API는 포함되지 않으며, 라이브 채팅 연동은 Node 호스트의 `NEXT_PUBLIC_CHAT_SSE_BASE`가 필요할 수 있습니다.
+| 프로젝트 | 설명 | AWS | GitHub Pages |
+| --- | --- | --- | --- |
+| 도네이션 랜덤 룰렛 | SOOP · 치지직 도네이션으로 아이템이 등록되는 방송용 랜덤 룰렛. 조작 페이지와 OBS 투명 오버레이 포함. | [/roulette/](https://streamcontent.click/roulette/) | [/stream/roulette/](https://gwanguian.github.io/stream/roulette/) |
+| 채팅 투표 | SOOP · 치지직 채팅(`!투표 N`)으로 진행하는 방송용 실시간 투표. 타이머·결과 공개·오버레이 포함. | [/poll/](https://streamcontent.click/poll/) | [/stream/poll/](https://gwanguian.github.io/stream/poll/) |
+| 이어말하기 | 채팅으로 문장을 이어가는 방송용 컨텐츠. | [/sentence/](https://streamcontent.click/sentence/) | [/stream/sentence/](https://gwanguian.github.io/stream/sentence/) |
+
+> Pages는 Settings → Pages → Source를 **GitHub Actions**로 켠 뒤 `main` 푸시 시 배포됩니다. AWS는 `.github/workflows/aws-static.yml`이 같은 푸시에서 OIDC로 S3에 sync 합니다. 정적 호스팅이라 로컬 `pnpm dev`의 채팅 SSE API는 포함되지 않으며, 라이브 채팅 연동은 Node 호스트의 `NEXT_PUBLIC_CHAT_SSE_BASE`가 필요할 수 있습니다.

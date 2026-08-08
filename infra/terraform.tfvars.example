@@ -1,0 +1,9 @@
+# Copy to terraform.tfvars if you need overrides (optional — defaults match production).
+aws_region         = "ap-northeast-2"
+domain_name        = "streamcontent.click"
+github_repository  = "GWANGUIAN/stream"
+github_branch      = "main"
+project_name       = "stream"
+
+# Required when the account already has a GitHub OIDC provider (EntityAlreadyExists).
+# github_oidc_provider_arn = "arn:aws:iam::ACCOUNT_ID:oidc-provider/token.actions.githubusercontent.com"

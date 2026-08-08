@@ -1,6 +1,7 @@
 import type { NextConfig } from 'next'
 
-// GitHub Pages(`/stream/poll`)와 로컬 개발 URL을 동일하게 맞춥니다.
+// 기본값은 GitHub Pages(`/stream/poll`). AWS 커스텀 도메인은 CI에서
+// NEXT_PUBLIC_BASE_PATH=/poll 로 덮어씁니다.
 const isStaticExport = process.env.NEXT_PUBLIC_STATIC_EXPORT === 'true'
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '/stream/poll'
 
