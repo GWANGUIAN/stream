@@ -1,11 +1,9 @@
 'use client'
 
-import { MAX_POLL_OPTIONS } from '@stream/poll'
 import {
   History,
   Infinity as InfinityIcon,
   Play,
-  Plus,
   RotateCcw,
   Sparkles,
   Square,
@@ -25,7 +23,6 @@ export function ControlBar({ store, snapshot, onOpenHistory }: ControlBarProps) 
   const { phase, options, durationSec } = snapshot
   const validOptionCount = options.filter((o) => o.label.trim()).length
   const canStart = validOptionCount >= 2
-  const canAddOption = options.length < MAX_POLL_OPTIONS
 
   return (
     <div className="control-bar">
@@ -76,20 +73,6 @@ export function ControlBar({ store, snapshot, onOpenHistory }: ControlBarProps) 
               />
               <span>초</span>
             </label>
-            <button
-              type="button"
-              className="btn btn-sm btn-secondary"
-              onClick={() => store.engine.addOption(`항목 ${options.length + 1}`)}
-              disabled={!canAddOption}
-              title={
-                canAddOption
-                  ? '투표 항목 추가'
-                  : `최대 ${MAX_POLL_OPTIONS}개까지 추가할 수 있어요`
-              }
-            >
-              <Plus size={15} />
-              항목 추가
-            </button>
           </div>
 
           <button
