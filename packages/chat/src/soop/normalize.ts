@@ -13,9 +13,25 @@ function viewer(nickname: string, id = nickname): ChatUser {
   }
 }
 
+/** 선행 빈 필드를 한 칸 제거합니다(VIDEO/AD 패킷 레이아웃). */
+function skipLeadingEmpty(fields: string[]): string[] {
+  return fields[0] === '' ? fields.slice(1) : fields
+}
+
+function positiveAmount(...candidates: Array<string | undefined>): number {
+  for (const raw of candidates) {
+    if (raw === undefined || raw === '') continue
+    const n = Number(raw)
+    if (Number.isFinite(n) && n > 0) return n
+  }
+  return 0
+}
+
 /**
  * SOOP 서비스 코드별 필드를 정규화 이벤트로 바꿉니다.
- * 필드 배치는 커뮤니티 라이브러리(soop-extension 등) 기준입니다.
+ *
+ * 필드 배치는 실방송 패킷 + 커뮤니티 라이브러리(soop-extension) 기준입니다.
+ * decodePackets가 payload 선행 `\f`를 이미 한 칸 제거한 뒤의 인덱스를 사용합니다.
  */
 export function normalizeSoopPacket(packet: DecodedPacket): ChatEvent[] {
   const f = packet.fields
@@ -23,9 +39,9 @@ export function normalizeSoopPacket(packet: DecodedPacket): ChatEvent[] {
 
   switch (packet.svc) {
     case SVC.CHAT: {
-      // 일반 채팅: [comment, ?, userId, ?, nickname, ...]
+      // [comment, userId, flags..., nickname, ...]
       const text = f[0] ?? ''
-      const userId = f[2] ?? 'anonymous'
+      const userId = f[1] || 'anonymous'
       const nickname = f[5] || f[4] || userId
       return [
         {
@@ -39,42 +55,81 @@ export function normalizeSoopPacket(packet: DecodedPacket): ChatEvent[] {
         },
       ]
     }
-    case SVC.TEXT_DONATION:
-    case SVC.AD_BALLOON:
-    case SVC.VIDEO_DONATION: {
-      // 후원: 금액/닉네임 위치가 svc마다 약간 다릅니다. 방어적으로 파싱합니다.
-      const nickname = f[2] || f[1] || '익명'
-      const amount = Number(f[3] ?? f[4] ?? 0)
-      const text = f[5] || f[6] || undefined
+    case SVC.TEXT_DONATION: {
+      // [to, from, fromUsername, amount, fanClubOrdinal]
+      const userId = f[1] || 'anonymous'
+      const nickname = f[2] || userId
+      const amount = positiveAmount(f[3], f[4])
       return [
         {
           type: 'donation',
           platform: 'soop',
-          user: viewer(nickname),
-          amount: Number.isFinite(amount) ? amount : 0,
+          user: viewer(nickname, userId),
+          amount,
           currency: 'balloon',
-          text,
+          text: undefined,
+          at,
+          raw: packet,
+        },
+      ]
+    }
+    case SVC.VIDEO_DONATION: {
+      // 선행 빈 필드 가능: [to, from, fromUsername, amount, fanClubOrdinal]
+      const d = skipLeadingEmpty(f)
+      const userId = d[1] || 'anonymous'
+      const nickname = d[2] || userId
+      const amount = positiveAmount(d[3], d[4])
+      return [
+        {
+          type: 'donation',
+          platform: 'soop',
+          user: viewer(nickname, userId),
+          amount,
+          currency: 'balloon',
+          text: undefined,
+          at,
+          raw: packet,
+        },
+      ]
+    }
+    case SVC.AD_BALLOON: {
+      // 선행 빈 필드 후: [to, from, fromUsername, *5 fillers, amount, fanClubOrdinal]
+      const d = skipLeadingEmpty(f)
+      const userId = d[1] || 'anonymous'
+      const nickname = d[2] || userId
+      const amount = positiveAmount(d[8], d[9], d[7], d[10])
+      return [
+        {
+          type: 'donation',
+          platform: 'soop',
+          user: viewer(nickname, userId),
+          amount,
+          currency: 'balloon',
+          text: undefined,
           at,
           raw: packet,
         },
       ]
     }
     case SVC.SUBSCRIBE: {
-      const nickname = f[1] || f[2] || '익명'
+      // [to, from, fromUsername, months, ...]
+      const userId = f[1] || 'anonymous'
+      const nickname = f[2] || userId
       const months = Number(f[3] ?? 1)
       return [
         {
           type: 'subscription',
           platform: 'soop',
-          user: viewer(nickname),
-          months: Number.isFinite(months) ? months : 1,
+          user: viewer(nickname, userId),
+          months: Number.isFinite(months) && months > 0 ? months : 1,
           at,
           raw: packet,
         },
       ]
     }
     case SVC.NOTIFICATION: {
-      const text = f[0] || f[1] || '알림'
+      // 실방송: [chatNo, flag, flag, notificationText, ...]
+      const text = f[3] || f[0] || f[1] || '알림'
       return [{ type: 'system', platform: 'soop', text, at, raw: packet }]
     }
     default:
