@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // GitHub Pages 루트 랜딩 페이지를 apps.json 목록으로부터 생성합니다.
 // 새 앱을 추가할 때는 이 목록에 한 줄만 추가하면 됩니다(빌드/복사 스텝은 워크플로에 추가).
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -11,6 +11,18 @@ const apps = JSON.parse(readFileSync(path.join(here, 'apps.json'), 'utf8'))
 const outDir = process.argv[2] ?? path.join(here, '..', '..', '_site')
 mkdirSync(outDir, { recursive: true })
 
+const imagesSrc = path.join(here, 'images')
+const imagesDest = path.join(outDir, 'images')
+if (existsSync(imagesSrc)) {
+  mkdirSync(imagesDest, { recursive: true })
+  cpSync(imagesSrc, imagesDest, { recursive: true })
+}
+
+const faviconSrc = path.join(here, 'favicon.ico')
+if (existsSync(faviconSrc)) {
+  cpSync(faviconSrc, path.join(outDir, 'favicon.ico'))
+}
+
 const escapeHtml = (value) =>
   value.replace(/[&<>"']/g, (char) => {
     const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }
@@ -18,14 +30,20 @@ const escapeHtml = (value) =>
   })
 
 const cards = apps
-  .map(
-    (app) => `
-        <a class="card" href="./${app.path}">
-          <span class="card-title">${escapeHtml(app.name)}</span>
-          <span class="card-desc">${escapeHtml(app.description)}</span>
+  .map((app) => {
+    const image = app.image
+      ? `
+          <img class="card-image" src="./${escapeHtml(app.image)}" alt="${escapeHtml(app.name)} 미리보기" loading="lazy" width="640" height="360" />`
+      : ''
+    return `
+        <a class="card" href="./${app.path}">${image}
+          <span class="card-body">
+            <span class="card-title">${escapeHtml(app.name)}</span>
+            <span class="card-desc">${escapeHtml(app.description)}</span>
+          </span>
           <span class="card-arrow" aria-hidden="true">&rarr;</span>
-        </a>`,
-  )
+        </a>`
+  })
   .join('\n')
 
 const html = `<!doctype html>
@@ -35,6 +53,7 @@ const html = `<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>stream</title>
 <meta name="description" content="방송용 도구 모음" />
+<link rel="icon" href="./favicon.ico" type="image/x-icon" />
 <style>
   :root {
     color-scheme: dark;
@@ -57,7 +76,7 @@ const html = `<!doctype html>
       radial-gradient(circle at 85% 90%, rgba(139, 92, 246, 0.18), transparent 55%),
       linear-gradient(160deg, var(--bg-1), var(--bg-0));
   }
-  main { width: 100%; max-width: 640px; }
+  main { width: 100%; max-width: 720px; }
   h1 {
     margin: 0 0 0.4rem;
     font-size: clamp(2.4rem, 6vw, 3.4rem);
@@ -70,36 +89,51 @@ const html = `<!doctype html>
     color: rgba(243, 236, 255, 0.72);
     font-size: 1.05rem;
   }
-  .list { display: flex; flex-direction: column; gap: 0.75rem; }
+  .list { display: flex; flex-direction: column; gap: 1rem; }
   .card {
     display: grid;
     grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
     align-items: center;
-    gap: 0.15rem 1rem;
-    padding: 1.1rem 1.3rem;
-    border-radius: 14px;
+    gap: 0.85rem 1rem;
+    padding: 0.85rem;
+    border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(255, 255, 255, 0.04);
     text-decoration: none;
     color: inherit;
     transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+    overflow: hidden;
   }
   .card:hover {
     border-color: rgba(255, 180, 67, 0.55);
     background: rgba(255, 255, 255, 0.07);
     transform: translateY(-1px);
   }
-  .card-title { font-weight: 700; font-size: 1.08rem; grid-column: 1; }
+  .card-image {
+    grid-column: 1 / -1;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.35);
+    display: block;
+  }
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+  .card-title { font-weight: 700; font-size: 1.08rem; }
   .card-desc {
-    grid-column: 1;
     color: rgba(243, 236, 255, 0.6);
     font-size: 0.88rem;
   }
   .card-arrow {
-    grid-column: 2;
-    grid-row: 1 / span 2;
     color: var(--accent);
     font-size: 1.3rem;
+    align-self: center;
   }
   footer {
     margin-top: 2.4rem;

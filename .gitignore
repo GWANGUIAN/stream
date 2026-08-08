@@ -3,9 +3,12 @@ dist/
 build/
 .next/
 out/
+_site/
 coverage/
 .turbo/
 *.tsbuildinfo
+.github/pages/scripts/package.json
+.github/pages/scripts/package-lock.json
 
 .env
 .env.local

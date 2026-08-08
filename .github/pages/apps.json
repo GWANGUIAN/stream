@@ -3,18 +3,20 @@
     "id": "roulette",
     "name": "도네이션 랜덤 룰렛",
     "description": "SOOP · 치지직 도네이션으로 아이템이 등록되는 방송용 랜덤 룰렛",
-    "path": "roulette/"
+    "path": "roulette/",
+    "image": "images/roulette.png"
   },
   {
     "id": "poll",
     "name": "채팅 투표",
     "description": "SOOP · 치지직 채팅으로 진행하는 방송용 실시간 투표",
-    "path": "poll/"
+    "path": "poll/",
+    "image": "images/poll.png"
   },
   {
     "id": "sentence",
-    "name": "5W 문장 룰렛",
-    "description": "채팅으로 누가·어디서·어떻게·무엇을·왜를 모아 문장을 뽑는 방송용 슬롯 룰렛",
+    "name": "랜덤 문장 만들기",
+    "description": "채팅으로 누가·어디서·어떻게·무엇을·왜를 모아 랜덤 문장을 만드는 방송용 툴",
     "path": "sentence/"
   }
 ]
