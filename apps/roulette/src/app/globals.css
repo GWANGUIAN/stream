@@ -664,7 +664,7 @@ textarea {
 
 .wheel-shell {
   position: relative;
-  width: min(100%, 460px);
+  width: min(100%, 760px);
   aspect-ratio: 1;
 }
 
