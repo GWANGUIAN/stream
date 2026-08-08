@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { exampleCommands } from '@/lib/examples'
 import { useSentenceStore } from '@/lib/hooks'
 import { playRevealFanfare } from '@/lib/sound'
+import type { SentenceStoreSnapshot } from '@/lib/store'
 import { CandidatePanels } from './candidate-panels'
 import { ControlBar } from './control-bar'
 import { EntryFeed } from './entry-feed'
@@ -18,12 +19,23 @@ import { SentenceBoard } from './sentence-board'
 import { ThemeToggle } from './theme-toggle'
 import { TitleBar } from './title-bar'
 
+function maxSpinSeq(snapshot: SentenceStoreSnapshot): number {
+  return Math.max(0, ...snapshot.sections.map((s) => snapshot.picks[s.id]?.spinSeq ?? 0))
+}
+
 export function Console() {
   const { store, snapshot } = useSentenceStore()
   const [menuOpen, setMenuOpen] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
   const [copied, setCopied] = useState(false)
-  const lastResultRef = useRef<string | null>(null)
+  const [reelsAnimating, setReelsAnimating] = useState(false)
+  /** 애니메이션까지 끝난 것으로 공개한 spinSeq. 엔진 결과보다 늦게 따라갑니다. */
+  const [revealedKey, setRevealedKey] = useState<number | null>(null)
+  const wasAnimatingRef = useRef(false)
+
+  const handleAnimatingChange = useCallback((animating: boolean) => {
+    setReelsAnimating(animating)
+  }, [])
 
   const handlePrimaryAction = useCallback(() => {
     if (!store || !snapshot) return
@@ -64,24 +76,43 @@ export function Console() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [handlePrimaryAction, store, snapshot])
 
-  useEffect(() => {
-    if (!snapshot?.result?.sentence) return
-    if (lastResultRef.current === snapshot.result.sentence) return
-    if (snapshot.phase !== 'revealed' && snapshot.phase !== 'spinning') return
+  const currentKey = snapshot ? maxSpinSeq(snapshot) : 0
 
-    lastResultRef.current = snapshot.result.sentence
-    // 릴 애니메이션이 끝난 뒤 연출되도록 살짝 지연
-    const timer = window.setTimeout(() => {
-      playRevealFanfare()
-      void confetti({
-        particleCount: 120,
-        spread: 78,
-        origin: { y: 0.55 },
-        colors: ['#c8f542', '#3ecfff', '#ffcb57', '#ffffff'],
-      })
-    }, 2800)
-    return () => window.clearTimeout(timer)
-  }, [snapshot?.result?.sentence, snapshot?.phase])
+  // 복원 시에는 바로 공개 상태로 맞춥니다.
+  useEffect(() => {
+    if (!snapshot || revealedKey != null) return
+    setRevealedKey(currentKey)
+  }, [snapshot, currentKey, revealedKey])
+
+  // 릴이 모두 멈춘 뒤에만 문장 키를 따라가며 공개합니다.
+  useEffect(() => {
+    if (reelsAnimating) {
+      wasAnimatingRef.current = true
+      return
+    }
+    if (revealedKey == null) return
+    if (currentKey !== revealedKey) setRevealedKey(currentKey)
+  }, [reelsAnimating, currentKey, revealedKey])
+
+  const displaySentence =
+    snapshot && revealedKey != null && currentKey === revealedKey && !reelsAnimating
+      ? (snapshot.result?.sentence ?? null)
+      : null
+
+  useEffect(() => {
+    if (reelsAnimating) return
+    if (!wasAnimatingRef.current) return
+    wasAnimatingRef.current = false
+    if (!displaySentence) return
+
+    playRevealFanfare()
+    void confetti({
+      particleCount: 120,
+      spread: 78,
+      origin: { y: 0.55 },
+      colors: ['#c8f542', '#3ecfff', '#ffcb57', '#ffffff'],
+    })
+  }, [reelsAnimating, displaySentence])
 
   if (!store || !snapshot) {
     return (
@@ -101,7 +132,8 @@ export function Console() {
     window.setTimeout(() => setCopied(false), 1600)
   }
 
-  const sectionLocked = snapshot.phase === 'spinning'
+  const sectionLocked =
+    snapshot.phase === 'spinning' || reelsAnimating || currentKey !== revealedKey
 
   return (
     <div className="console-page">
@@ -158,9 +190,14 @@ export function Console() {
         </button>
       </div>
 
-      <ReelStage store={store} snapshot={snapshot} />
-      <SentenceBoard sentence={snapshot.result?.sentence ?? null} />
-      <ControlBar store={store} snapshot={snapshot} onOpenHistory={() => setHistoryOpen(true)} />
+      <ReelStage store={store} snapshot={snapshot} onAnimatingChange={handleAnimatingChange} />
+      <SentenceBoard sentence={displaySentence} />
+      <ControlBar
+        store={store}
+        snapshot={snapshot}
+        onOpenHistory={() => setHistoryOpen(true)}
+        animating={reelsAnimating}
+      />
 
       <section className="glass-panel">
         <h2 className="glass-panel-title">후보 모음</h2>

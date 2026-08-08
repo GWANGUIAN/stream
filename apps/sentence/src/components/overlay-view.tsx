@@ -4,11 +4,11 @@ import type { SentenceFeedEntry } from '@stream/sentence'
 import { colorForNickname } from '@stream/ui'
 import confetti from 'canvas-confetti'
 import { CheckCircle2, Circle, Dices, Lock, Play } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { exampleCommands } from '@/lib/examples'
 import { formatCountdown } from '@/lib/format'
 import { useOverlaySnapshot } from '@/lib/hooks'
-import type { SentenceStore } from '@/lib/store'
+import type { SentenceStore, SentenceStoreSnapshot } from '@/lib/store'
 import { ReelStage } from './reel-stage'
 
 const PHASE_ICON = {
@@ -19,6 +19,10 @@ const PHASE_ICON = {
   revealed: CheckCircle2,
 } as const
 
+function maxSpinSeq(snapshot: SentenceStoreSnapshot): number {
+  return Math.max(0, ...snapshot.sections.map((s) => snapshot.picks[s.id]?.spinSeq ?? 0))
+}
+
 /**
  * OBS 브라우저 소스용 읽기 전용 화면.
  * 조작 페이지 스냅샷을 BroadcastChannel/localStorage로만 미러링합니다.
@@ -27,13 +31,13 @@ export function OverlayView() {
   const snapshot = useOverlaySnapshot()
   const [, forceTick] = useState(0)
   const [toast, setToast] = useState<SentenceFeedEntry | null>(null)
+  const [reelsAnimating, setReelsAnimating] = useState(false)
+  const [revealedKey, setRevealedKey] = useState<number | null>(null)
   const lastSeenIdRef = useRef<string | null>(null)
   const initializedRef = useRef(false)
-  const lastResultRef = useRef<string | null>(null)
+  const wasAnimatingRef = useRef(false)
   const hideTimerRef = useRef<number | null>(null)
 
-  // 오버레이는 엔진이 없어 ReelStage에 dummy store가 필요합니다.
-  // spin 버튼은 compact 모드에서 숨기므로 메서드는 쓰이지 않습니다.
   const dummyStore = useMemo(
     () =>
       ({
@@ -45,26 +49,50 @@ export function OverlayView() {
     [],
   )
 
+  const handleAnimatingChange = useCallback((animating: boolean) => {
+    setReelsAnimating(animating)
+  }, [])
+
   useEffect(() => {
     if (snapshot?.phase !== 'collecting') return
     const id = window.setInterval(() => forceTick((t) => t + 1), 250)
     return () => window.clearInterval(id)
   }, [snapshot?.phase])
 
+  const currentKey = snapshot ? maxSpinSeq(snapshot) : 0
+
   useEffect(() => {
-    if (!snapshot?.result?.sentence) return
-    if (lastResultRef.current === snapshot.result.sentence) return
-    lastResultRef.current = snapshot.result.sentence
-    const timer = window.setTimeout(() => {
-      void confetti({
-        particleCount: 140,
-        spread: 80,
-        origin: { y: 0.55 },
-        colors: ['#c8f542', '#3ecfff', '#ffcb57'],
-      })
-    }, 2800)
-    return () => window.clearTimeout(timer)
-  }, [snapshot?.result?.sentence])
+    if (!snapshot || revealedKey != null) return
+    setRevealedKey(currentKey)
+  }, [snapshot, currentKey, revealedKey])
+
+  useEffect(() => {
+    if (reelsAnimating) {
+      wasAnimatingRef.current = true
+      return
+    }
+    if (revealedKey == null) return
+    if (currentKey !== revealedKey) setRevealedKey(currentKey)
+  }, [reelsAnimating, currentKey, revealedKey])
+
+  const displaySentence =
+    snapshot && revealedKey != null && currentKey === revealedKey && !reelsAnimating
+      ? (snapshot.result?.sentence ?? null)
+      : null
+
+  useEffect(() => {
+    if (reelsAnimating) return
+    if (!wasAnimatingRef.current) return
+    wasAnimatingRef.current = false
+    if (!displaySentence) return
+
+    void confetti({
+      particleCount: 140,
+      spread: 80,
+      origin: { y: 0.55 },
+      colors: ['#c8f542', '#3ecfff', '#ffcb57'],
+    })
+  }, [reelsAnimating, displaySentence])
 
   useEffect(() => {
     if (!snapshot) return
@@ -104,7 +132,7 @@ export function OverlayView() {
     )
   }
 
-  const { phase, title, endsAt, result, sections } = snapshot
+  const { phase, title, endsAt, sections } = snapshot
   const remainingMs =
     phase === 'collecting' && endsAt != null ? Math.max(0, endsAt - Date.now()) : null
   const isHot = remainingMs != null && remainingMs <= 10_000
@@ -136,9 +164,14 @@ export function OverlayView() {
         </p>
       )}
 
-      <ReelStage store={dummyStore} snapshot={snapshot} compact />
+      <ReelStage
+        store={dummyStore}
+        snapshot={snapshot}
+        compact
+        onAnimatingChange={handleAnimatingChange}
+      />
 
-      {result?.sentence && <p className="overlay-sentence">{result.sentence}</p>}
+      {displaySentence && <p className="overlay-sentence">{displaySentence}</p>}
 
       {toast && (
         <div className="overlay-toast-stack">
