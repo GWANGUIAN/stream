@@ -46,7 +46,7 @@ export function SourcePanel({ store, platform, streamerId }: SourcePanelProps) {
     <section className="glass-panel">
       <h2 className="glass-panel-title">방송 연결</h2>
       <p className="glass-panel-sub">
-        SOOP(숲) 또는 치지직 채팅에 연결하면 `!누가` 같은 커맨드를 자동으로 받습니다.
+        SOOP(숲) 또는 치지직 채팅에 연결하면 `!누가 왁굳형이` 같은 채팅을 자동으로 받습니다.
       </p>
 
       <div className="field">

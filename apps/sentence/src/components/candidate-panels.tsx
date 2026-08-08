@@ -23,10 +23,7 @@ export function CandidatePanels({ store, snapshot }: CandidatePanelsProps) {
         >
           <div className="candidate-panel-head">
             <h3 className="candidate-panel-title">
-              {section.label}{' '}
-              <span className="field-hint" style={{ fontFamily: 'var(--font-mono)' }}>
-                {section.prefix}
-              </span>
+              {section.label} <span className="field-hint command-hint">{section.prefix}</span>
             </h3>
             {section.entries.length > 0 && (
               <button

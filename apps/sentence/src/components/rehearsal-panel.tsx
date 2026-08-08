@@ -14,7 +14,7 @@ export function RehearsalPanel({ store, sections, phase }: RehearsalPanelProps) 
   const enabled = sections.filter((s) => s.enabled)
   const [nickname, setNickname] = useState('테스트시청자')
   const [sectionId, setSectionId] = useState<SectionId>(enabled[0]?.id ?? 'who')
-  const [text, setText] = useState('사슴이')
+  const [text, setText] = useState('왁굳형이')
 
   function handleSend() {
     store.engine.injectRehearsal(sectionId, text.trim() || '테스트', nickname.trim() || '익명')

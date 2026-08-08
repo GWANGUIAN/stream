@@ -33,9 +33,12 @@
 
   --surface: rgba(8, 16, 28, 0.92);
 
-  --font-display: "Black Han Sans", "Malgun Gothic", sans-serif;
-  --font-body: "Noto Sans KR", "Malgun Gothic", sans-serif;
-  --font-mono: "JetBrains Mono", "Cascadia Code", monospace;
+  /* next/font face 변수 + 한글 fallback (모노에 한글 없으면 굴림으로 떨어지는 것 방지) */
+  --font-display: var(--font-display-face, "Black Han Sans"), "Malgun Gothic", sans-serif;
+  --font-body: var(--font-body-face, "Noto Sans KR"), "Malgun Gothic", sans-serif;
+  --font-mono:
+    var(--font-mono-face, "JetBrains Mono"), var(--font-body-face, "Noto Sans KR"), "Malgun Gothic",
+    monospace;
 
   --radius-lg: 1.35rem;
   --radius-md: 0.9rem;
@@ -1543,7 +1546,7 @@ textarea {
   }
 }
 
-/* ---------- 5W section chips ---------- */
+/* ---------- section chips ---------- */
 
 .section-toggle-row {
   display: flex;
@@ -1701,7 +1704,8 @@ textarea {
   text-align: center;
   font-size: 0.72rem;
   color: var(--muted-dim);
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
+  font-weight: 700;
 }
 
 .reel-spin-btn {
@@ -1729,11 +1733,11 @@ textarea {
 }
 
 .sentence-board-label {
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
   color: var(--muted);
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
+  font-weight: 700;
 }
 
 .sentence-board-text {
@@ -1799,6 +1803,10 @@ textarea {
   font-family: var(--font-display);
   font-size: 0.92rem;
   margin: 0;
+}
+
+.command-hint {
+  font-family: var(--font-mono);
 }
 
 .candidate-list {

@@ -48,7 +48,7 @@ export function SentenceSettingsPanel({
 
   return (
     <section className="glass-panel">
-      <h2 className="glass-panel-title">룰렛 옵션</h2>
+      <h2 className="glass-panel-title">문장 옵션</h2>
       <p className="glass-panel-sub">타이머, 중복 투표, 가중치, 커맨드를 설정합니다.</p>
 
       <div className="field">
@@ -140,7 +140,7 @@ export function SentenceSettingsPanel({
             />
           </div>
         ))}
-        <span className="field-hint">예: 채팅에 `!누가 사슴이`</span>
+        <span className="field-hint">예: 채팅에 `!누가 왁굳형이`</span>
       </div>
     </section>
   )

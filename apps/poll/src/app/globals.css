@@ -33,9 +33,12 @@
 
   --surface: rgba(10, 14, 24, 0.92);
 
-  --font-display: "Jua", "Malgun Gothic", sans-serif;
-  --font-body: "Gowun Dodum", "Malgun Gothic", sans-serif;
-  --font-mono: "JetBrains Mono", "Cascadia Code", monospace;
+  /* next/font face 변수 + 한글 fallback (모노에 한글 없으면 굴림으로 떨어지는 것 방지) */
+  --font-display: var(--font-display-face, "Jua"), "Malgun Gothic", sans-serif;
+  --font-body: var(--font-body-face, "Gowun Dodum"), "Malgun Gothic", sans-serif;
+  --font-mono:
+    var(--font-mono-face, "JetBrains Mono"), var(--font-body-face, "Gowun Dodum"), "Malgun Gothic",
+    monospace;
 
   --radius-lg: 1.35rem;
   --radius-md: 0.9rem;

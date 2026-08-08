@@ -38,9 +38,12 @@ html.dark {
   --shadow-toast: 0 12px 30px -12px rgba(0, 0, 0, 0.6);
   --shadow-banner: 0 30px 70px -20px rgba(0, 0, 0, 0.8);
 
-  --font-display: "Black Han Sans", "Malgun Gothic", sans-serif;
-  --font-body: "Noto Sans KR", "Malgun Gothic", sans-serif;
-  --font-mono: "JetBrains Mono", "Cascadia Code", monospace;
+  /* next/font face 변수 + 한글 fallback (모노에 한글 없으면 굴림으로 떨어지는 것 방지) */
+  --font-display: var(--font-display-face, "Black Han Sans"), "Malgun Gothic", sans-serif;
+  --font-body: var(--font-body-face, "Noto Sans KR"), "Malgun Gothic", sans-serif;
+  --font-mono:
+    var(--font-mono-face, "JetBrains Mono"), var(--font-body-face, "Noto Sans KR"), "Malgun Gothic",
+    monospace;
 
   --radius-lg: 1.25rem;
   --radius-md: 0.85rem;

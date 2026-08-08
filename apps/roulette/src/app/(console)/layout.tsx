@@ -8,21 +8,21 @@ import '../globals.css'
 const display = Black_Han_Sans({
   subsets: ['latin'],
   weight: '400',
-  variable: '--font-display',
+  variable: '--font-display-face',
   display: 'swap',
 })
 
 const body = Noto_Sans_KR({
   subsets: ['latin'],
   weight: ['400', '500', '700', '900'],
-  variable: '--font-body',
+  variable: '--font-body-face',
   display: 'swap',
 })
 
 const mono = JetBrains_Mono({
   subsets: ['latin'],
   weight: ['400', '600'],
-  variable: '--font-mono',
+  variable: '--font-mono-face',
   display: 'swap',
 })
 
@@ -33,18 +33,7 @@ export const metadata: Metadata = {
   manifest: withBasePath('/manifest.json'),
   themeColor: '#ffb443',
   icons: {
-    icon: [
-      { url: withBasePath('/favicon.ico') },
-      { url: withBasePath('/favicon-16x16.png'), sizes: '16x16', type: 'image/png' },
-      { url: withBasePath('/favicon-32x32.png'), sizes: '32x32', type: 'image/png' },
-      { url: withBasePath('/favicon-96x96.png'), sizes: '96x96', type: 'image/png' },
-      { url: withBasePath('/android-icon-192x192.png'), sizes: '192x192', type: 'image/png' },
-    ],
-    apple: [
-      { url: withBasePath('/apple-icon.png') },
-      { url: withBasePath('/apple-icon-180x180.png'), sizes: '180x180', type: 'image/png' },
-    ],
-    other: [{ rel: 'msapplication-config', url: withBasePath('/browserconfig.xml') }],
+    icon: [{ url: withBasePath('/favicon.ico') }],
   },
 }
 

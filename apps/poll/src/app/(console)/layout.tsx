@@ -7,21 +7,21 @@ import '../globals.css'
 const display = Jua({
   subsets: ['latin'],
   weight: '400',
-  variable: '--font-display',
+  variable: '--font-display-face',
   display: 'swap',
 })
 
 const body = Gowun_Dodum({
   subsets: ['latin'],
   weight: '400',
-  variable: '--font-body',
+  variable: '--font-body-face',
   display: 'swap',
 })
 
 const mono = JetBrains_Mono({
   subsets: ['latin'],
   weight: ['400', '600'],
-  variable: '--font-mono',
+  variable: '--font-mono-face',
   display: 'swap',
 })
 

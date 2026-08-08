@@ -5,6 +5,7 @@ import { colorForNickname } from '@stream/ui'
 import confetti from 'canvas-confetti'
 import { CheckCircle2, Circle, Dices, Lock, Play } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { exampleCommands } from '@/lib/examples'
 import { formatCountdown } from '@/lib/format'
 import { useOverlaySnapshot } from '@/lib/hooks'
 import type { SentenceStore } from '@/lib/store'
@@ -98,7 +99,7 @@ export function OverlayView() {
   if (!snapshot) {
     return (
       <div className="overlay-root">
-        <p className="overlay-empty">문장 룰렛을 불러오는 중…</p>
+        <p className="overlay-empty">랜덤 문장 만들기를 불러오는 중…</p>
       </div>
     )
   }
@@ -108,10 +109,7 @@ export function OverlayView() {
     phase === 'collecting' && endsAt != null ? Math.max(0, endsAt - Date.now()) : null
   const isHot = remainingMs != null && remainingMs <= 10_000
   const Icon = PHASE_ICON[phase]
-  const prefixes = sections
-    .filter((s) => s.enabled)
-    .map((s) => s.prefix)
-    .join(' · ')
+  const examples = exampleCommands(sections)
 
   return (
     <div className="overlay-root">
@@ -128,7 +126,13 @@ export function OverlayView() {
 
       {phase === 'collecting' && (
         <p className="overlay-instruction">
-          채팅에 <code>{prefixes}</code> + 텍스트
+          채팅에{' '}
+          {examples.slice(0, 3).map((example, index) => (
+            <span key={example}>
+              {index > 0 ? ' · ' : null}
+              <code>{example}</code>
+            </span>
+          ))}
         </p>
       )}
 

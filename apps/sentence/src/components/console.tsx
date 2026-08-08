@@ -3,6 +3,7 @@
 import confetti from 'canvas-confetti'
 import { Check, Copy, History, Menu } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { exampleCommands } from '@/lib/examples'
 import { useSentenceStore } from '@/lib/hooks'
 import { playRevealFanfare } from '@/lib/sound'
 import { CandidatePanels } from './candidate-panels'
@@ -90,14 +91,11 @@ export function Console() {
     )
   }
 
-  const prefixes = snapshot.sections
-    .filter((s) => s.enabled)
-    .map((s) => s.prefix)
-    .join(' · ')
+  const examples = exampleCommands(snapshot.sections)
 
   function copyInstruction() {
     void navigator.clipboard.writeText(
-      `채팅창에 "${prefixes.split(' · ')[0]} 텍스트" 처럼 입력해서 문장 조각을 보내 주세요!`,
+      `채팅창에 "${examples[0] ?? '!누가 왁굳형이'}" 처럼 입력해서 문장 조각을 보내 주세요!`,
     )
     setCopied(true)
     window.setTimeout(() => setCopied(false), 1600)
@@ -145,7 +143,14 @@ export function Console() {
 
       <div className="instruction-card">
         <span className="instruction-text">
-          시청자는 채팅에 <code>{prefixes}</code> + 텍스트로 참여해요.
+          채팅에{' '}
+          {examples.map((example, index) => (
+            <span key={example}>
+              {index > 0 ? ' · ' : null}
+              <code>{example}</code>
+            </span>
+          ))}{' '}
+          처럼 보내 주세요.
         </span>
         <button type="button" className="btn btn-sm btn-ghost" onClick={copyInstruction}>
           {copied ? <Check size={14} /> : <Copy size={14} />}

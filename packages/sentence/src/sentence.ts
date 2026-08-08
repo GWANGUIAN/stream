@@ -58,6 +58,8 @@ export interface SectionPick {
   sectionLabel: string
   entryId: string
   text: string
+  /** 뽑기마다 증가. UI가 같은 문구 재추첨에도 애니메이션을 돌리도록 합니다. */
+  spinSeq: number
 }
 
 export interface SentenceResult {
@@ -147,7 +149,7 @@ export function pickWeightedIndex(weights: number[], random: () => number = Math
 }
 
 /**
- * 방송용 5W 문장 룰렛 엔진 (`!누가 사슴이`).
+ * 방송용 랜덤 문장 만들기 엔진 (`!누가 왁굳형이`).
  *
  * 조작 페이지가 소유하고, `onChange`로 스냅샷을 구독합니다.
  * 진행 상태는 idle → collecting → closed → spinning → revealed 순서로 흐릅니다.
@@ -164,6 +166,7 @@ export class SentenceEngine {
   private result: SentenceResult | null = null
   private feed: SentenceFeedEntry[] = []
   private history: SentenceHistoryEntry[] = []
+  private spinSeq = 0
 
   /** 섹션별 닉네임 → 기여한 entry id 목록 (중복 투표 제어용). */
   private voterEntries = new Map<SectionId, Map<string, string[]>>()
@@ -177,7 +180,7 @@ export class SentenceEngine {
   private detachBus: (() => void) | undefined
 
   constructor(options: SentenceEngineOptions = {}) {
-    this.title = options.title?.trim() || '5W 문장 룰렛'
+    this.title = options.title?.trim() || '랜덤 문장 만들기'
     this.settings = { ...DEFAULT_SETTINGS, ...options.settings }
     this.durationSec = options.durationSec ?? 90
     this.feedLimit = options.feedLimit ?? 50
@@ -430,11 +433,13 @@ export class SentenceEngine {
     const index = pickWeightedIndex(weights, this.random)
     const entry = section.entries[index]
     if (!entry) return undefined
+    this.spinSeq += 1
     return {
       sectionId: section.id,
       sectionLabel: section.label,
       entryId: entry.id,
       text: entry.text,
+      spinSeq: this.spinSeq,
     }
   }
 
@@ -501,7 +506,7 @@ export class SentenceEngine {
     }
   }
 
-  /** `!누가 사슴이` 형식의 채팅을 파싱합니다. 유효하면 true. */
+  /** `!누가 왁굳형이` 형식의 채팅을 파싱합니다. 유효하면 true. */
   handleChatMessage(event: ChatMessageEvent): boolean {
     if (this.syncTimer()) this.notify()
     if (this.phase !== 'collecting') return false
@@ -677,8 +682,21 @@ export class SentenceEngine {
     if (snapshot.endsAt !== undefined) this.endsAt = snapshot.endsAt
     if (snapshot.feed) this.feed = [...snapshot.feed]
     if (snapshot.history) this.history = [...snapshot.history]
-    if (snapshot.picks) this.picks = { ...snapshot.picks }
-    if (snapshot.result) this.result = { ...snapshot.result, picks: [...snapshot.result.picks] }
+    if (snapshot.picks) {
+      this.picks = Object.fromEntries(
+        Object.entries(snapshot.picks).map(([id, pick]) => [
+          id,
+          pick ? { ...pick, spinSeq: pick.spinSeq ?? 0 } : pick,
+        ]),
+      ) as Partial<Record<SectionId, SectionPick>>
+      this.spinSeq = Math.max(0, ...Object.values(this.picks).map((p) => p?.spinSeq ?? 0))
+    }
+    if (snapshot.result) {
+      this.result = {
+        ...snapshot.result,
+        picks: snapshot.result.picks.map((p) => ({ ...p, spinSeq: p.spinSeq ?? 0 })),
+      }
+    }
     if (snapshot.sections) {
       this.sections = DEFAULT_SECTIONS.map((def) => {
         const saved = snapshot.sections?.find((s) => s.id === def.id)
