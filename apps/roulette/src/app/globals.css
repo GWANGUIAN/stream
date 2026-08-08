@@ -152,11 +152,19 @@ textarea {
 /* ---------- layout ---------- */
 
 .console-page {
-  min-height: 100vh;
-  padding: 1.5rem clamp(1rem, 3vw, 2.5rem) 4rem;
+  min-height: 100dvh;
+  padding: 1.25rem clamp(1rem, 3vw, 2.5rem) 2.75rem;
   display: flex;
   flex-direction: column;
-  gap: 1.4rem;
+  gap: 1rem;
+}
+
+@media (min-width: 901px) {
+  .console-page {
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
 }
 
 .console-header {
@@ -212,9 +220,8 @@ textarea {
 }
 
 .console-stage {
-  /* 헤더·제목·타이머·단축키·여백을 제외한 가로/세로 중 작은 쪽으로 정사각 맞춤 */
-  width: min(100%, calc(100vw - 3rem), calc(100dvh - 15rem));
-  max-width: 920px;
+  /* 헤더·제목·타이머·단축키·여백(~20rem)을 빼고, 스크롤 없이 들어가는 최대 정사각 */
+  width: min(100%, calc(100vw - 3rem), calc(100dvh - 20rem), 680px);
   display: flex;
   justify-content: center;
 }
@@ -238,7 +245,7 @@ textarea {
   }
 
   .console-stage {
-    width: min(100%, calc(100vw - 2rem), calc(100dvh - 12rem));
+    width: min(100%, calc(100vw - 2rem), calc(100dvh - 18rem), 560px);
   }
 
   .console-side {
