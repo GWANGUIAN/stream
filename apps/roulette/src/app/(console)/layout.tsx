@@ -27,9 +27,9 @@ const mono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: '도네이션 랜덤 룰렛',
-  description: 'SOOP · 치지직 도네이션으로 아이템이 등록되는 방송용 랜덤 룰렛',
-  applicationName: '도네이션 랜덤 룰렛',
+  title: '후원 랜덤 룰렛',
+  description: 'SOOP · 치지직 후원으로 아이템이 등록되는 방송용 랜덤 룰렛',
+  applicationName: '후원 랜덤 룰렛',
   manifest: withBasePath('/manifest.json'),
   themeColor: '#ffb443',
   icons: {

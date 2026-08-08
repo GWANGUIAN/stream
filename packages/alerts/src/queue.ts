@@ -10,7 +10,7 @@ function defaultId(): string {
 }
 
 /**
- * 도네이션/구독 알림 우선순위 큐.
+ * 후원/구독 알림 우선순위 큐.
  * 동시 알림을 막고 최소 표시 시간을 보장합니다.
  */
 export class AlertQueue {

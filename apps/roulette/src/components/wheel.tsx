@@ -149,7 +149,7 @@ export function Wheel({
           <div className="wheel-empty-state">
             아직 등록된 아이템이 없어요.
             <br />
-            도네이션이 들어오거나 수동으로 추가해 보세요.
+            후원이 들어오거나 수동으로 추가해 보세요.
           </div>
         ) : (
           <svg

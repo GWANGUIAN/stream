@@ -68,7 +68,7 @@ export class RouletteStore {
     }
   }
 
-  /** 채팅 SSE에서 받은 이벤트를 엔진에 흘려보냅니다(도네이션만 실제로 반영됩니다). */
+  /** 채팅 SSE에서 받은 이벤트를 엔진에 흘려보냅니다(후원만 실제로 반영됩니다). */
   ingest(event: ChatSseClientEvent): void {
     if (event.type === 'hello') return
     this.bus.emit(event)

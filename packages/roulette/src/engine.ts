@@ -46,7 +46,7 @@ function defaultId(prefix: string): string {
 }
 
 /**
- * 도네이션 랜덤 룰렛의 헤드리스 엔진.
+ * 후원 랜덤 룰렛의 헤드리스 엔진.
  *
  * `EventBus`의 donation 이벤트를 구독해 아이템을 자동 등록하고,
  * 수동 편집/타이머/스핀/히스토리를 모두 관리합니다.

@@ -43,7 +43,7 @@ export function SourcePanel({ store, platform, streamerId }: SourcePanelProps) {
     <section className="glass-panel">
       <h2 className="glass-panel-title">방송 연결</h2>
       <p className="glass-panel-sub">
-        SOOP(숲) 또는 치지직 채팅에 연결하면 도네이션이 자동으로 원판 아이템으로 등록됩니다.
+        SOOP(숲) 또는 치지직 채팅에 연결하면 후원이 자동으로 원판 아이템으로 등록됩니다.
       </p>
 
       <div className="field">

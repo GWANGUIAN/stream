@@ -61,7 +61,7 @@ export interface ChatConnection {
   disconnect: () => void
 }
 
-/** SOOP/치지직 채팅 SSE 구독을 관리하고, 도네이션 이벤트를 콜백으로 넘깁니다. */
+/** SOOP/치지직 채팅 SSE 구독을 관리하고, 후원 이벤트를 콜백으로 넘깁니다. */
 export function useChatConnection(onEvent: (event: ChatSseClientEvent) => void): ChatConnection {
   const [status, setStatus] = useState<ConnectionStatus>('idle')
   const [message, setMessage] = useState('')

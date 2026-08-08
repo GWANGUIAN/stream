@@ -26,9 +26,9 @@ const mono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: '도네이션 랜덤 룰렛 · 오버레이',
+  title: '후원 랜덤 룰렛 · 오버레이',
   description: 'OBS 브라우저 소스용 투명 배경 오버레이',
-  applicationName: '도네이션 랜덤 룰렛',
+  applicationName: '후원 랜덤 룰렛',
   manifest: withBasePath('/manifest.json'),
   themeColor: '#ffb443',
   icons: {

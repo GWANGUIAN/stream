@@ -13,7 +13,7 @@ SOOP(숲)과 치지직 방송 컨텐츠를 만들기 위한 pnpm 워크스페이
 | `@stream/chat` | 정규화된 실시간 채팅 WebSocket (`@stream/api`로 부트스트랩) |
 | `@stream/events` | 채팅·라이브 이벤트 버스 (필터 / dedupe / debounce) |
 | `@stream/sse` | 서버 chat → SSE 브릿지 + 브라우저 구독 헬퍼 |
-| `@stream/alerts` | 도네이션·구독 알림 우선순위 큐 |
+| `@stream/alerts` | 후원·구독 알림 우선순위 큐 |
 | `@stream/bot` | 채팅 명령어·자동응답 프레임워크 |
 | `@stream/session` | 크리에이터 프로필·설정·토큰 영속화 (Memory / File) |
 | `@stream/live` | 방송 시작/종료 폴링 모니터 · uptime |
@@ -26,9 +26,9 @@ SOOP(숲)과 치지직 방송 컨텐츠를 만들기 위한 pnpm 워크스페이
 | `@stream/chat-ui` | 방송용 채팅 라인/리스트 컴포넌트 |
 | `@stream/overlay` | OBS Browser Source용 오버레이 위젯 |
 | `@stream/ui` | shadcn 스타일 UI + 치지직·SOOP 브랜드 로그인 버튼 |
-| `@stream/roulette` | 도네이션 → 아이템 자동 등록, 가중치 추첨, 히스토리/되돌리기 헤드리스 룰렛 엔진 |
+| `@stream/roulette` | 후원 → 아이템 자동 등록, 가중치 추첨, 히스토리/되돌리기 헤드리스 룰렛 엔진 |
 | `apps/demo` | OAuth 로그인 · 채널 조회 · 채팅 검증용 Next.js 데모 |
-| `apps/roulette` | 도네이션 랜덤 룰렛 조작 페이지 + OBS 투명 오버레이 (Next.js, 포트 3001) |
+| `apps/roulette` | 후원 랜덤 룰렛 조작 페이지 + OBS 투명 오버레이 (Next.js, 포트 3001) |
 
 ```
 유저 OAuth 로그인  →  @stream/auth
@@ -92,7 +92,7 @@ SOOP OAuth는 파트너 키가 없으면 버튼이 비활성입니다(채널 조
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-### 도네이션 랜덤 룰렛 (`apps/roulette`)
+### 후원 랜덤 룰렛 (`apps/roulette`)
 
 ```bash
 pnpm --filter @stream/roulette-app dev
@@ -217,7 +217,7 @@ Private. 비공식 API 사용은 각 플랫폼 이용약관을 확인한 뒤 본
 
 | 프로젝트 | 설명 | AWS | GitHub Pages |
 | --- | --- | --- | --- |
-| 도네이션 랜덤 룰렛 | SOOP · 치지직 도네이션으로 아이템이 등록되는 방송용 랜덤 룰렛. 조작 페이지와 OBS 투명 오버레이 포함. | [/roulette/](https://streamcontent.click/roulette/) | [/stream/roulette/](https://gwanguian.github.io/stream/roulette/) |
+| 후원 랜덤 룰렛 | SOOP · 치지직 후원으로 아이템이 등록되는 방송용 랜덤 룰렛. 조작 페이지와 OBS 투명 오버레이 포함. | [/roulette/](https://streamcontent.click/roulette/) | [/stream/roulette/](https://gwanguian.github.io/stream/roulette/) |
 | 채팅 투표 | SOOP · 치지직 채팅(`!투표 N`)으로 진행하는 방송용 실시간 투표. 타이머·결과 공개·오버레이 포함. | [/poll/](https://streamcontent.click/poll/) | [/stream/poll/](https://gwanguian.github.io/stream/poll/) |
 | 이어말하기 | 채팅으로 문장을 이어가는 방송용 컨텐츠. | [/sentence/](https://streamcontent.click/sentence/) | [/stream/sentence/](https://gwanguian.github.io/stream/sentence/) |
 

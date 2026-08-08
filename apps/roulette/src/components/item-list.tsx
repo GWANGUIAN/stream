@@ -90,7 +90,7 @@ export function ItemList({ store, items }: ItemListProps) {
     <section className="glass-panel item-list-panel">
       <h2 className="glass-panel-title">아이템 목록</h2>
       <p className="glass-panel-sub">
-        도네이션으로 자동 등록되거나, 여기서 바로 수정할 수 있습니다.
+        후원으로 자동 등록되거나, 여기서 바로 수정할 수 있습니다.
       </p>
 
       <div className="field-row">

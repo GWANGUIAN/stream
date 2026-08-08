@@ -20,7 +20,7 @@ export function RulePanel({ store, rule, weightMode, winnerAction }: RulePanelPr
   return (
     <section className="glass-panel">
       <h2 className="glass-panel-title">등록 규칙</h2>
-      <p className="glass-panel-sub">도네이션 금액을 아이템 개수로 바꾸는 규칙을 설정합니다.</p>
+      <p className="glass-panel-sub">후원 금액을 아이템 개수로 바꾸는 규칙을 설정합니다.</p>
 
       <div className="field">
         <span className="field-label">등록 방식</span>

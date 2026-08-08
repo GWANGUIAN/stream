@@ -1,8 +1,8 @@
 [
   {
     "id": "roulette",
-    "name": "도네이션 랜덤 룰렛",
-    "description": "도네이션으로 아이템이 등록되는 방송용 랜덤 룰렛",
+    "name": "후원 랜덤 룰렛",
+    "description": "후원으로 아이템이 등록되는 방송용 랜덤 룰렛",
     "path": "roulette/",
     "image": "images/roulette.png"
   },
