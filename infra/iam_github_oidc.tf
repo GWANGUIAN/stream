@@ -24,13 +24,12 @@ data "aws_iam_policy_document" "github_assume" {
       values   = ["sts.amazonaws.com"]
     }
 
+    # Environment jobs use …:environment:NAME; push jobs use …:ref:refs/heads/….
+    # Allow any subject under this repo so both forms (and future claim tweaks) work.
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values = [
-        "repo:${var.github_repository}:ref:refs/heads/${var.github_branch}",
-        "repo:${var.github_repository}:environment:aws-static",
-      ]
+      values   = ["repo:${var.github_repository}:*"]
     }
   }
 }
