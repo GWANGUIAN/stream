@@ -50,6 +50,12 @@ jobs:
           NEXT_PUBLIC_BASE_PATH: /stream/poll
         run: pnpm run build:pages
 
+      - name: Build sentence (static export)
+        working-directory: apps/sentence
+        env:
+          NEXT_PUBLIC_BASE_PATH: /stream/sentence
+        run: pnpm run build:pages
+
       - name: Assemble Pages site
         run: |
           mkdir -p _site
@@ -57,6 +63,7 @@ jobs:
           touch _site/.nojekyll
           cp -r apps/roulette/out _site/roulette
           cp -r apps/poll/out _site/poll
+          cp -r apps/sentence/out _site/sentence
           node .github/pages/build-index.mjs _site
 
       - name: Upload Pages artifact

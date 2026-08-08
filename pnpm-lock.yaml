@@ -285,6 +285,73 @@ importers:
         specifier: 'catalog:'
         version: 7.0.2
 
+  apps/sentence:
+    dependencies:
+      '@stream/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
+      '@stream/chat':
+        specifier: workspace:*
+        version: link:../../packages/chat
+      '@stream/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@stream/events':
+        specifier: workspace:*
+        version: link:../../packages/events
+      '@stream/sentence':
+        specifier: workspace:*
+        version: link:../../packages/sentence
+      '@stream/sse':
+        specifier: workspace:*
+        version: link:../../packages/sse
+      '@stream/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      canvas-confetti:
+        specifier: ^1.9.3
+        version: 1.9.4
+      lucide-react:
+        specifier: 'catalog:'
+        version: 0.525.0(react@19.2.8)
+      next:
+        specifier: 'catalog:'
+        version: 16.2.12(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      react:
+        specifier: 'catalog:'
+        version: 19.2.8
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.2.8(react@19.2.8)
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
+    devDependencies:
+      '@stream/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@tailwindcss/postcss':
+        specifier: 'catalog:'
+        version: 4.3.3
+      '@types/canvas-confetti':
+        specifier: ^1.9.0
+        version: 1.9.0
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.1.2
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: 'catalog:'
+        version: 19.2.4(@types/react@19.2.18)
+      tailwindcss:
+        specifier: 'catalog:'
+        version: 4.3.3
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+
   packages/alerts:
     dependencies:
       '@stream/chat':
@@ -671,6 +738,31 @@ importers:
       '@stream/core':
         specifier: workspace:*
         version: link:../core
+    devDependencies:
+      '@stream/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.1.2
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.10(@types/node@26.1.2)(vite@8.2.0(@types/node@26.1.2)(esbuild@0.27.7)(jiti@2.7.0))
+
+  packages/sentence:
+    dependencies:
+      '@stream/chat':
+        specifier: workspace:*
+        version: link:../chat
+      '@stream/core':
+        specifier: workspace:*
+        version: link:../core
+      '@stream/events':
+        specifier: workspace:*
+        version: link:../events
     devDependencies:
       '@stream/config':
         specifier: workspace:*

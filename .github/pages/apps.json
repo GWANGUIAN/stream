@@ -10,5 +10,11 @@
     "name": "채팅 투표",
     "description": "SOOP · 치지직 채팅으로 진행하는 방송용 실시간 투표",
     "path": "poll/"
+  },
+  {
+    "id": "sentence",
+    "name": "5W 문장 룰렛",
+    "description": "채팅으로 누가·어디서·어떻게·무엇을·왜를 모아 문장을 뽑는 방송용 슬롯 룰렛",
+    "path": "sentence/"
   }
 ]

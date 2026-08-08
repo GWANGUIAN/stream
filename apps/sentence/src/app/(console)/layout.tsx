@@ -1,0 +1,51 @@
+import type { Metadata, Viewport } from 'next'
+import { Black_Han_Sans, JetBrains_Mono, Noto_Sans_KR } from 'next/font/google'
+import type { ReactNode } from 'react'
+import { THEME_INIT_SCRIPT } from '@/lib/theme'
+import '../globals.css'
+
+const display = Black_Han_Sans({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-display',
+  display: 'swap',
+})
+
+const body = Noto_Sans_KR({
+  subsets: ['latin'],
+  weight: ['400', '500', '700', '900'],
+  variable: '--font-body',
+  display: 'swap',
+})
+
+const mono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '600'],
+  variable: '--font-mono',
+  display: 'swap',
+})
+
+export const metadata: Metadata = {
+  title: '5W 문장 룰렛',
+  description: '채팅으로 누가·어디서·어떻게·무엇을·왜를 모아 문장을 뽑는 방송용 슬롯 룰렛',
+  applicationName: '5W 문장 룰렛',
+}
+
+export const viewport: Viewport = {
+  themeColor: '#c8f542',
+}
+
+export default function ConsoleLayout({ children }: { children: ReactNode }) {
+  return (
+    <html
+      lang="ko"
+      className={`${display.variable} ${body.variable} ${mono.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
+      <body>{children}</body>
+    </html>
+  )
+}
