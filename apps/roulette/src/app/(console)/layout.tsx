@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Black_Han_Sans, JetBrains_Mono, Noto_Sans_KR } from 'next/font/google'
 import type { ReactNode } from 'react'
 import { withBasePath } from '@/lib/base-path'
+import { themeInitScript } from '@/lib/theme'
 import '../globals.css'
 
 const display = Black_Han_Sans({
@@ -49,7 +50,14 @@ export const metadata: Metadata = {
 
 export default function ConsoleLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="ko" className={`dark ${display.variable} ${body.variable} ${mono.variable}`}>
+    <html
+      lang="ko"
+      className={`dark ${display.variable} ${body.variable} ${mono.variable}`}
+      suppressHydrationWarning
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body>{children}</body>
     </html>
   )

@@ -6,6 +6,7 @@ import { HistoryPanel } from './history-panel'
 import { ItemList } from './item-list'
 import { LogFeed } from './log-feed'
 import { MenuDrawer } from './menu-drawer'
+import { ThemeToggle } from './theme-toggle'
 import { TimerBar } from './timer-bar'
 import { TimerDisplay } from './timer-display'
 import { TitleBar } from './title-bar'
@@ -67,17 +68,20 @@ export function Console() {
   return (
     <div className="console-page">
       <header className="console-header">
-        <button
-          type="button"
-          className="btn btn-icon btn-ghost"
-          aria-label="메뉴 열기"
-          onClick={() => setMenuOpen(true)}
-        >
-          ☰
-        </button>
-        <span className="brand-tag">
-          <b>STREAM</b>.ROULETTE
-        </span>
+        <div className="header-left">
+          <button
+            type="button"
+            className="btn btn-icon btn-ghost"
+            aria-label="메뉴 열기"
+            onClick={() => setMenuOpen(true)}
+          >
+            ☰
+          </button>
+          <span className="brand-tag">
+            <b>STREAM</b>.ROULETTE
+          </span>
+        </div>
+        <ThemeToggle />
       </header>
 
       <TitleBar title={snapshot.title} onChange={(title) => store.engine.setTitle(title)} />
