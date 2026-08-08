@@ -1,7 +1,8 @@
 'use client'
 
+import type { ChatSseClientEvent } from '@stream/sse/client'
 import { useCallback, useEffect, useState } from 'react'
-import { useRouletteStore } from '@/lib/hooks'
+import { useChatConnection, useRouletteStore } from '@/lib/hooks'
 import { HistoryPanel } from './history-panel'
 import { ItemList } from './item-list'
 import { LogFeed } from './log-feed'
@@ -16,6 +17,14 @@ export function Console() {
   const { store, snapshot } = useRouletteStore()
   const [historyOpen, setHistoryOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const onChatEvent = useCallback(
+    (event: ChatSseClientEvent) => {
+      store?.ingest(event)
+    },
+    [store],
+  )
+  const connection = useChatConnection(onChatEvent)
+  const connected = connection.status === 'connected'
 
   const handleSpin = useCallback(() => {
     store?.engine.spin()
@@ -87,6 +96,23 @@ export function Console() {
       <TitleBar title={snapshot.title} onChange={(title) => store.engine.setTitle(title)} />
       <TimerDisplay store={store} timer={snapshot.timer} />
 
+      {!connected ? (
+        <button
+          type="button"
+          className="instruction-card instruction-card-action"
+          onClick={() => setMenuOpen(true)}
+        >
+          <span className="instruction-text">
+            {connection.status === 'connecting'
+              ? 'SOOP · 치지직에 연결하는 중…'
+              : connection.status === 'error'
+                ? connection.message || '연결에 실패했어요. 탭해서 다시 연결해 주세요.'
+                : 'SOOP · 치지직이 연결되지 않았어요. 탭해서 방송 연결을 열어 주세요.'}
+          </span>
+          <span className="btn btn-sm btn-secondary">방송 연결</span>
+        </button>
+      ) : null}
+
       <div className="console-body">
         <div className="console-stage">
           <div className="wheel-stage">
@@ -129,6 +155,7 @@ export function Console() {
       <MenuDrawer
         store={store}
         snapshot={snapshot}
+        connection={connection}
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
         onOpenHistory={() => {

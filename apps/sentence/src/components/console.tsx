@@ -1,10 +1,11 @@
 'use client'
 
+import type { ChatSseClientEvent } from '@stream/sse/client'
 import confetti from 'canvas-confetti'
 import { Check, Copy, History, Menu } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { exampleCommands } from '@/lib/examples'
-import { useSentenceStore } from '@/lib/hooks'
+import { useChatConnection, useSentenceStore } from '@/lib/hooks'
 import { playRevealFanfare } from '@/lib/sound'
 import type { SentenceStoreSnapshot } from '@/lib/store'
 import { CandidatePanels } from './candidate-panels'
@@ -32,6 +33,14 @@ export function Console() {
   /** 애니메이션까지 끝난 것으로 공개한 spinSeq. 엔진 결과보다 늦게 따라갑니다. */
   const [revealedKey, setRevealedKey] = useState<number | null>(null)
   const wasAnimatingRef = useRef(false)
+  const onChatEvent = useCallback(
+    (event: ChatSseClientEvent) => {
+      store?.ingest(event)
+    },
+    [store],
+  )
+  const connection = useChatConnection(onChatEvent)
+  const connected = connection.status === 'connected'
 
   const handleAnimatingChange = useCallback((animating: boolean) => {
     setReelsAnimating(animating)
@@ -173,22 +182,39 @@ export function Console() {
 
       <SectionToggles store={store} sections={snapshot.sections} locked={sectionLocked} />
 
-      <div className="instruction-card">
-        <span className="instruction-text">
-          채팅에{' '}
-          {examples.map((example, index) => (
-            <span key={example}>
-              {index > 0 ? ' · ' : null}
-              <code>{example}</code>
-            </span>
-          ))}{' '}
-          처럼 보내 주세요.
-        </span>
-        <button type="button" className="btn btn-sm btn-ghost" onClick={copyInstruction}>
-          {copied ? <Check size={14} /> : <Copy size={14} />}
-          {copied ? '복사됨' : '안내 문구 복사'}
+      {connected ? (
+        <div className="instruction-card">
+          <span className="instruction-text">
+            채팅에{' '}
+            {examples.map((example, index) => (
+              <span key={example}>
+                {index > 0 ? ' · ' : null}
+                <code>{example}</code>
+              </span>
+            ))}{' '}
+            처럼 보내 주세요.
+          </span>
+          <button type="button" className="btn btn-sm btn-ghost" onClick={copyInstruction}>
+            {copied ? <Check size={14} /> : <Copy size={14} />}
+            {copied ? '복사됨' : '안내 문구 복사'}
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          className="instruction-card instruction-card-action"
+          onClick={() => setMenuOpen(true)}
+        >
+          <span className="instruction-text">
+            {connection.status === 'connecting'
+              ? 'SOOP · 치지직에 연결하는 중…'
+              : connection.status === 'error'
+                ? connection.message || '연결에 실패했어요. 탭해서 다시 연결해 주세요.'
+                : 'SOOP · 치지직 채팅이 연결되지 않았어요. 탭해서 방송 연결을 열어 주세요.'}
+          </span>
+          <span className="btn btn-sm btn-secondary">방송 연결</span>
         </button>
-      </div>
+      )}
 
       <ReelStage store={store} snapshot={snapshot} onAnimatingChange={handleAnimatingChange} />
       <SentenceBoard sentence={displaySentence} />
@@ -225,6 +251,7 @@ export function Console() {
       <MenuDrawer
         store={store}
         snapshot={snapshot}
+        connection={connection}
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
         onOpenHistory={() => {

@@ -3,6 +3,7 @@
 import type { RouletteSnapshot } from '@stream/roulette'
 import { useState } from 'react'
 import { withBasePath } from '@/lib/base-path'
+import type { ChatConnection } from '@/lib/hooks'
 import type { RouletteStore } from '@/lib/store'
 import { ItemManager } from './item-manager'
 import { RehearsalPanel } from './rehearsal-panel'
@@ -12,12 +13,20 @@ import { SourcePanel } from './source-panel'
 export interface MenuDrawerProps {
   store: RouletteStore
   snapshot: RouletteSnapshot
+  connection: ChatConnection
   open: boolean
   onClose: () => void
   onOpenHistory: () => void
 }
 
-export function MenuDrawer({ store, snapshot, open, onClose, onOpenHistory }: MenuDrawerProps) {
+export function MenuDrawer({
+  store,
+  snapshot,
+  connection,
+  open,
+  onClose,
+  onOpenHistory,
+}: MenuDrawerProps) {
   const [copied, setCopied] = useState(false)
 
   function copyOverlayUrl() {
@@ -59,6 +68,7 @@ export function MenuDrawer({ store, snapshot, open, onClose, onOpenHistory }: Me
             store={store}
             platform={snapshot.platform}
             streamerId={snapshot.streamerId}
+            connection={connection}
           />
           <RulePanel
             store={store}

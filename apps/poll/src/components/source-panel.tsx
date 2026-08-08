@@ -3,7 +3,7 @@
 import type { Platform } from '@stream/core'
 import { ChzzkMark, SoopMark } from '@stream/ui/brand'
 import { useState } from 'react'
-import { useChatConnection } from '@/lib/hooks'
+import type { ChatConnection } from '@/lib/hooks'
 import type { PollStore } from '@/lib/store'
 
 const PLACEHOLDER: Record<Platform, { label: string; hint: string }> = {
@@ -15,12 +15,13 @@ export interface SourcePanelProps {
   store: PollStore
   platform: Platform
   streamerId: string
+  connection: ChatConnection
 }
 
-export function SourcePanel({ store, platform, streamerId }: SourcePanelProps) {
+export function SourcePanel({ store, platform, streamerId, connection }: SourcePanelProps) {
   const [localPlatform, setLocalPlatform] = useState<Platform>(platform)
   const [localId, setLocalId] = useState(streamerId)
-  const { status, message, connect, disconnect } = useChatConnection((event) => store.ingest(event))
+  const { status, message, connect, disconnect } = connection
   const info = PLACEHOLDER[localPlatform]
 
   function handlePlatformSelect(next: Platform) {

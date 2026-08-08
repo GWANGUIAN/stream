@@ -1,8 +1,9 @@
 'use client'
 
+import type { ChatSseClientEvent } from '@stream/sse/client'
 import { Check, Copy, History, Menu } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { usePollStore } from '@/lib/hooks'
+import { useChatConnection, usePollStore } from '@/lib/hooks'
 import { playRevealFanfare } from '@/lib/sound'
 import { ControlBar } from './control-bar'
 import { HistoryPanel } from './history-panel'
@@ -19,6 +20,14 @@ export function Console() {
   const [historyOpen, setHistoryOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const lastPhaseRef = useRef<string | null>(null)
+  const onChatEvent = useCallback(
+    (event: ChatSseClientEvent) => {
+      store?.ingest(event)
+    },
+    [store],
+  )
+  const connection = useChatConnection(onChatEvent)
+  const connected = connection.status === 'connected'
 
   const handlePrimaryAction = useCallback(() => {
     if (!store || !snapshot) return
@@ -129,15 +138,32 @@ export function Console() {
         }
       />
 
-      <div className="instruction-card">
-        <span className="instruction-text">
-          시청자는 채팅에 <code>{snapshot.settings.votePrefix} 1</code> 처럼 입력해서 투표해요.
-        </span>
-        <button type="button" className="btn btn-sm btn-ghost" onClick={copyInstruction}>
-          {copied ? <Check size={14} /> : <Copy size={14} />}
-          {copied ? '복사됨' : '안내 문구 복사'}
+      {connected ? (
+        <div className="instruction-card">
+          <span className="instruction-text">
+            시청자는 채팅에 <code>{snapshot.settings.votePrefix} 1</code> 처럼 입력해서 투표해요.
+          </span>
+          <button type="button" className="btn btn-sm btn-ghost" onClick={copyInstruction}>
+            {copied ? <Check size={14} /> : <Copy size={14} />}
+            {copied ? '복사됨' : '안내 문구 복사'}
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          className="instruction-card instruction-card-action"
+          onClick={() => setMenuOpen(true)}
+        >
+          <span className="instruction-text">
+            {connection.status === 'connecting'
+              ? 'SOOP · 치지직에 연결하는 중…'
+              : connection.status === 'error'
+                ? connection.message || '연결에 실패했어요. 탭해서 다시 연결해 주세요.'
+                : 'SOOP · 치지직 채팅이 연결되지 않았어요. 탭해서 방송 연결을 열어 주세요.'}
+          </span>
+          <span className="btn btn-sm btn-secondary">방송 연결</span>
         </button>
-      </div>
+      )}
 
       <VoteStage store={store} snapshot={snapshot} />
       <ControlBar store={store} snapshot={snapshot} onOpenHistory={() => setHistoryOpen(true)} />
@@ -164,6 +190,7 @@ export function Console() {
       <MenuDrawer
         store={store}
         snapshot={snapshot}
+        connection={connection}
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
         onOpenHistory={() => {

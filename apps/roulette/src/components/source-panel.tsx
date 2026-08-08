@@ -4,19 +4,20 @@ import type { Platform } from '@stream/core'
 import { termsFor } from '@stream/roulette'
 import { ChzzkMark, SoopMark } from '@stream/ui/brand'
 import { useState } from 'react'
-import { useChatConnection } from '@/lib/hooks'
+import type { ChatConnection } from '@/lib/hooks'
 import type { RouletteStore } from '@/lib/store'
 
 export interface SourcePanelProps {
   store: RouletteStore
   platform: Platform
   streamerId: string
+  connection: ChatConnection
 }
 
-export function SourcePanel({ store, platform, streamerId }: SourcePanelProps) {
+export function SourcePanel({ store, platform, streamerId, connection }: SourcePanelProps) {
   const [localPlatform, setLocalPlatform] = useState<Platform>(platform)
   const [localId, setLocalId] = useState(streamerId)
-  const { status, message, connect, disconnect } = useChatConnection((event) => store.ingest(event))
+  const { status, message, connect, disconnect } = connection
   const terms = termsFor(localPlatform)
 
   function handlePlatformSelect(next: Platform) {

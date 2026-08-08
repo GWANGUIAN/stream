@@ -3,6 +3,7 @@
 import { Check, History, Link2, X } from 'lucide-react'
 import { useState } from 'react'
 import { withBasePath } from '@/lib/base-path'
+import type { ChatConnection } from '@/lib/hooks'
 import type { SentenceStore, SentenceStoreSnapshot } from '@/lib/store'
 import { RehearsalPanel } from './rehearsal-panel'
 import { SentenceSettingsPanel } from './sentence-settings-panel'
@@ -11,12 +12,20 @@ import { SourcePanel } from './source-panel'
 export interface MenuDrawerProps {
   store: SentenceStore
   snapshot: SentenceStoreSnapshot
+  connection: ChatConnection
   open: boolean
   onClose: () => void
   onOpenHistory: () => void
 }
 
-export function MenuDrawer({ store, snapshot, open, onClose, onOpenHistory }: MenuDrawerProps) {
+export function MenuDrawer({
+  store,
+  snapshot,
+  connection,
+  open,
+  onClose,
+  onOpenHistory,
+}: MenuDrawerProps) {
   const [copied, setCopied] = useState(false)
 
   function copyOverlayUrl() {
@@ -59,6 +68,7 @@ export function MenuDrawer({ store, snapshot, open, onClose, onOpenHistory }: Me
             store={store}
             platform={snapshot.platform}
             streamerId={snapshot.streamerId}
+            connection={connection}
           />
           <SentenceSettingsPanel
             store={store}

@@ -398,6 +398,22 @@ textarea {
   background: var(--brand-soft);
 }
 
+button.instruction-card-action {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+button.instruction-card-action:hover {
+  border-color: color-mix(in srgb, var(--brand) 55%, var(--line));
+  background: color-mix(in srgb, var(--brand) 16%, var(--brand-soft));
+}
+
 .instruction-text {
   font-size: 0.88rem;
   color: var(--muted);
