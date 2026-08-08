@@ -119,7 +119,15 @@ export function Console() {
         editable={snapshot.phase === 'idle'}
         onChange={(title) => store.engine.setTitle(title)}
       />
-      <PhaseTimer store={store} phase={snapshot.phase} endsAt={snapshot.endsAt} />
+      <PhaseTimer
+        store={store}
+        phase={snapshot.phase}
+        endsAt={snapshot.endsAt}
+        showLiveResults={snapshot.settings.showLiveResults}
+        onToggleLiveResults={() =>
+          store.engine.setShowLiveResults(!snapshot.settings.showLiveResults)
+        }
+      />
 
       <div className="instruction-card">
         <span className="instruction-text">
@@ -142,7 +150,8 @@ export function Console() {
           <span className="kbd">R</span> 결과 공개
         </span>
         <span>
-          <span className="kbd">L</span> 실시간 공개
+          <span className="kbd">L</span>{' '}
+          실시간 현황 {snapshot.settings.showLiveResults ? '켜짐' : '꺼짐'}
         </span>
         <span>
           <span className="kbd">M</span> 메뉴

@@ -3,7 +3,7 @@
 import type { PollFeedEntry, PollOptionResult } from '@stream/poll'
 import { colorForNickname } from '@stream/ui'
 import confetti from 'canvas-confetti'
-import { CheckCircle2, Circle, Lock, Play } from 'lucide-react'
+import { CheckCircle2, Circle, Eye, EyeOff, Lock, Play } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { formatCountdown } from '@/lib/format'
 import { useOverlaySnapshot } from '@/lib/hooks'
@@ -102,11 +102,28 @@ export function OverlayView() {
             {formatCountdown(remainingMs)}
           </span>
         )}
+        {phase !== 'revealed' && (
+          <span
+            className={`overlay-live-badge ${settings.showLiveResults ? 'on' : 'off'}`}
+            aria-label={
+              settings.showLiveResults ? '실시간 투표 현황 켜짐' : '실시간 투표 현황 꺼짐'
+            }
+          >
+            {settings.showLiveResults ? <Eye size={16} /> : <EyeOff size={16} />}
+            {settings.showLiveResults ? '실시간 현황 켜짐' : '실시간 현황 꺼짐'}
+          </span>
+        )}
       </div>
 
       {phase === 'running' && !showBars && (
         <p className="overlay-instruction">
           채팅창에 <code>{settings.votePrefix} 1</code> 처럼 입력해서 투표해 주세요!
+          <span className="overlay-instruction-sub">결과는 마감 후 한꺼번에 공개됩니다</span>
+        </p>
+      )}
+      {phase === 'running' && showBars && (
+        <p className="overlay-instruction overlay-instruction-live">
+          실시간으로 투표 현황이 집계되고 있어요
         </p>
       )}
       {phase === 'closed' && (

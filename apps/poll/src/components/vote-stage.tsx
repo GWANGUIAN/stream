@@ -101,13 +101,13 @@ export function VoteStage({ store, snapshot }: VoteStageProps) {
 
       {phase === 'running' && (
         <div
-          className="vote-bar-hidden-note"
+          className={`vote-bar-hidden-note ${showResults ? 'live-on' : 'live-off'}`}
           style={{ justifyContent: 'center', padding: '0.2rem' }}
         >
           {showResults ? <Eye size={13} /> : <EyeOff size={13} />}
           {showResults
-            ? `실시간 결과 공개 중 · ${totalVotes.toLocaleString('ko-KR')}표`
-            : '실시간 결과 비공개 · 결과 공개 전까지 현황이 보이지 않아요'}
+            ? `실시간 현황 켜짐 · ${totalVotes.toLocaleString('ko-KR')}표`
+            : '실시간 현황 꺼짐 · 결과 공개 전까지 표·퍼센트가 숨겨져요'}
         </div>
       )}
 

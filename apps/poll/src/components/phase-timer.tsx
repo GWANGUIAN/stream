@@ -1,7 +1,7 @@
 'use client'
 
 import type { PollPhase } from '@stream/poll'
-import { CheckCircle2, Circle, Lock, Play } from 'lucide-react'
+import { CheckCircle2, Circle, Eye, EyeOff, Lock, Play } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { formatCountdown } from '@/lib/format'
 import type { PollStore } from '@/lib/store'
@@ -10,6 +10,8 @@ export interface PhaseTimerProps {
   store: PollStore
   phase: PollPhase
   endsAt: number | null
+  showLiveResults: boolean
+  onToggleLiveResults: () => void
 }
 
 const PHASE_LABEL: Record<PollPhase, string> = {
@@ -26,7 +28,13 @@ const PHASE_ICON: Record<PollPhase, typeof Circle> = {
   revealed: CheckCircle2,
 }
 
-export function PhaseTimer({ store, phase, endsAt }: PhaseTimerProps) {
+export function PhaseTimer({
+  store,
+  phase,
+  endsAt,
+  showLiveResults,
+  onToggleLiveResults,
+}: PhaseTimerProps) {
   const [, forceTick] = useState(0)
 
   useEffect(() => {
@@ -48,6 +56,16 @@ export function PhaseTimer({ store, phase, endsAt }: PhaseTimerProps) {
         <Icon size={14} />
         {PHASE_LABEL[phase]}
       </span>
+      <button
+        type="button"
+        className={`live-badge ${showLiveResults ? 'on' : 'off'}`}
+        onClick={onToggleLiveResults}
+        title="단축키 L · 실시간 투표 현황 공개 전환"
+        aria-pressed={showLiveResults}
+      >
+        {showLiveResults ? <Eye size={14} /> : <EyeOff size={14} />}
+        {showLiveResults ? '실시간 현황 켜짐' : '실시간 현황 꺼짐'}
+      </button>
       {phase === 'running' && (
         <span className={`timer-value ${isHot ? 'hot' : ''}`}>
           {remainingMs != null ? formatCountdown(remainingMs) : '무제한'}

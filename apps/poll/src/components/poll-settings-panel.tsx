@@ -91,7 +91,9 @@ export function PollSettingsPanel({ store, settings, durationSec, phase }: PollS
 
       <div className="toggle-row">
         <div className="toggle-row-text">
-          <span className="toggle-row-title">실시간 결과 공개</span>
+          <span className="toggle-row-title">
+            실시간 결과 공개 · {settings.showLiveResults ? '켜짐' : '꺼짐'}
+          </span>
           <span className="toggle-row-hint">
             켜면 투표 중에 표·퍼센트가 바로 보입니다. 끄면 결과 공개 전까지 숨깁니다.
           </span>
