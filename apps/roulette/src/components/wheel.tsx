@@ -56,7 +56,7 @@ export function Wheel({
   onSpin,
   canSpin = true,
   interactive = true,
-  maxWidth = 460,
+  maxWidth,
 }: WheelProps) {
   const rotation = lastResult?.rotation ?? 0
 
@@ -139,7 +139,10 @@ export function Wheel({
   const maxChars = items.length > 10 ? 8 : items.length > 6 ? 12 : 16
 
   return (
-    <div className="wheel-shell" style={{ width: `min(100%, ${maxWidth}px)` }}>
+    <div
+      className="wheel-shell"
+      style={maxWidth != null ? { width: `min(100%, ${maxWidth}px)` } : undefined}
+    >
       <div className="wheel-pointer" />
       <div className="wheel-svg-wrap">
         {segments.length === 0 ? (

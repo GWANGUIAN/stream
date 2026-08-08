@@ -96,7 +96,6 @@ export function Console() {
               lastResult={snapshot.lastResult}
               onSpin={handleSpin}
               canSpin={snapshot.items.length > 0}
-              maxWidth={760}
             />
             <div className="shortcuts-row">
               <span>
