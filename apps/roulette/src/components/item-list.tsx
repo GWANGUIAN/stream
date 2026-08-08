@@ -1,12 +1,63 @@
 'use client'
 
-import type { RouletteItem } from '@stream/roulette'
+import { colorForIndex, type RouletteItem } from '@stream/roulette'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@stream/ui'
 import { useState } from 'react'
 import type { RouletteStore } from '@/lib/store'
 
 export interface ItemListProps {
   store: RouletteStore
   items: RouletteItem[]
+}
+
+function ItemRow({
+  store,
+  item,
+  index,
+}: {
+  store: RouletteStore
+  item: RouletteItem
+  index: number
+}) {
+  const swatchColor = item.color ?? colorForIndex(index)
+  const nicknames = item.contributors.slice(-4)
+  const row = (
+    <div className="item-row">
+      <span className="swatch" style={{ background: swatchColor }} />
+      <input
+        type="text"
+        defaultValue={item.label}
+        onBlur={(e) => store.engine.renameItem(item.id, e.target.value)}
+      />
+      <div className="stepper">
+        <button type="button" onClick={() => store.engine.setItemCount(item.id, item.count - 1)}>
+          −
+        </button>
+        <span>{item.count}</span>
+        <button type="button" onClick={() => store.engine.setItemCount(item.id, item.count + 1)}>
+          +
+        </button>
+      </div>
+      <button
+        type="button"
+        className="btn btn-icon btn-ghost"
+        onClick={() => store.engine.removeItem(item.id)}
+      >
+        ✕
+      </button>
+    </div>
+  )
+
+  if (nicknames.length === 0) return row
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{row}</TooltipTrigger>
+      <TooltipContent side="left" className="item-contrib-tooltip">
+        {nicknames.join(', ')}
+      </TooltipContent>
+    </Tooltip>
+  )
 }
 
 export function ItemList({ store, items }: ItemListProps) {
@@ -49,49 +100,17 @@ export function ItemList({ store, items }: ItemListProps) {
 
       <hr className="section-divider" />
 
-      <div className="item-table scroll-thin item-table-tall">
-        {items.length === 0 ? (
-          <div className="item-empty">등록된 아이템이 없습니다.</div>
-        ) : (
-          items.map((item) => (
-            <div key={item.id}>
-              <div className="item-row">
-                <span className="swatch" style={{ background: item.color ?? 'var(--accent)' }} />
-                <input
-                  type="text"
-                  defaultValue={item.label}
-                  onBlur={(e) => store.engine.renameItem(item.id, e.target.value)}
-                />
-                <div className="stepper">
-                  <button
-                    type="button"
-                    onClick={() => store.engine.setItemCount(item.id, item.count - 1)}
-                  >
-                    −
-                  </button>
-                  <span>{item.count}</span>
-                  <button
-                    type="button"
-                    onClick={() => store.engine.setItemCount(item.id, item.count + 1)}
-                  >
-                    +
-                  </button>
-                </div>
-                <button
-                  type="button"
-                  className="btn btn-icon btn-ghost"
-                  onClick={() => store.engine.removeItem(item.id)}
-                >
-                  ✕
-                </button>
-              </div>
-              {item.contributors.length > 0 && (
-                <div className="contributors">기여: {item.contributors.slice(-4).join(', ')}</div>
-              )}
-            </div>
-          ))
-        )}
-      </div>
+      <TooltipProvider delayDuration={280}>
+        <div className="item-table scroll-thin item-table-tall">
+          {items.length === 0 ? (
+            <div className="item-empty">등록된 아이템이 없습니다.</div>
+          ) : (
+            items.map((item, index) => (
+              <ItemRow key={item.id} store={store} item={item} index={index} />
+            ))
+          )}
+        </div>
+      </TooltipProvider>
 
       <div className="field-row" style={{ marginTop: '0.8rem' }}>
         <button
