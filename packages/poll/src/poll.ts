@@ -78,7 +78,7 @@ export interface PollEngineOptions {
   idFactory?: () => string
 }
 
-export const MAX_POLL_OPTIONS = 8
+export const MAX_POLL_OPTIONS = 100
 export const DEFAULT_VOTE_PREFIX = '!투표'
 
 const DEFAULT_SETTINGS: PollSettings = {
