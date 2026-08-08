@@ -33,10 +33,10 @@ const cards = apps
   .map((app) => {
     const image = app.image
       ? `
-          <img class="card-image" src="./${escapeHtml(app.image)}" alt="${escapeHtml(app.name)} 미리보기" loading="lazy" width="640" height="360" />`
+          <img class="card-image" src="./${escapeHtml(app.image)}" alt="${escapeHtml(app.name)} 미리보기" loading="lazy" width="320" height="180" />`
       : ''
     return `
-        <a class="card" href="./${app.path}">${image}
+        <a class="card${app.image ? ' has-image' : ''}" href="./${app.path}">${image}
           <span class="card-body">
             <span class="card-title">${escapeHtml(app.name)}</span>
             <span class="card-desc">${escapeHtml(app.description)}</span>
@@ -76,7 +76,7 @@ const html = `<!doctype html>
       radial-gradient(circle at 85% 90%, rgba(139, 92, 246, 0.18), transparent 55%),
       linear-gradient(160deg, var(--bg-1), var(--bg-0));
   }
-  main { width: 100%; max-width: 720px; }
+  main { width: 100%; max-width: 640px; }
   h1 {
     margin: 0 0 0.4rem;
     font-size: clamp(2.4rem, 6vw, 3.4rem);
@@ -89,21 +89,25 @@ const html = `<!doctype html>
     color: rgba(243, 236, 255, 0.72);
     font-size: 1.05rem;
   }
-  .list { display: flex; flex-direction: column; gap: 1rem; }
+  .list { display: flex; flex-direction: column; gap: 0.75rem; }
   .card {
     display: grid;
     grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto;
     align-items: center;
-    gap: 0.85rem 1rem;
-    padding: 0.85rem;
-    border-radius: 16px;
+    gap: 0.15rem 1rem;
+    padding: 1.1rem 1.3rem;
+    border-radius: 14px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(255, 255, 255, 0.04);
     text-decoration: none;
     color: inherit;
     transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
-    overflow: hidden;
+  }
+  .card.has-image {
+    grid-template-columns: minmax(140px, 42%) 1fr auto;
+    align-items: center;
+    gap: 0 1rem;
+    padding: 0.65rem 1rem 0.65rem 0.65rem;
   }
   .card:hover {
     border-color: rgba(255, 180, 67, 0.55);
@@ -111,8 +115,8 @@ const html = `<!doctype html>
     transform: translateY(-1px);
   }
   .card-image {
-    grid-column: 1 / -1;
     width: 100%;
+    max-width: 280px;
     aspect-ratio: 16 / 9;
     object-fit: cover;
     border-radius: 10px;
@@ -134,6 +138,20 @@ const html = `<!doctype html>
     color: var(--accent);
     font-size: 1.3rem;
     align-self: center;
+  }
+  @media (max-width: 520px) {
+    .card.has-image {
+      grid-template-columns: 1fr auto;
+      gap: 0.65rem 0.85rem;
+      padding: 0.75rem;
+    }
+    .card-image {
+      grid-column: 1 / -1;
+      max-width: none;
+    }
+    .card-arrow {
+      grid-row: 2;
+    }
   }
   footer {
     margin-top: 2.4rem;

@@ -1,10 +1,11 @@
 /**
- * 룰렛·투표 오버레이 미리보기 스크린샷을 찍습니다.
- * 사전 조건: 각 앱 개발 서버가 떠 있어야 합니다 (3001 / 3002).
+ * 룰렛·투표·문장 오버레이 미리보기 스크린샷을 찍습니다.
+ * 사전 조건: 각 앱 개발 서버가 떠 있어야 합니다 (3001 / 3002 / 3003).
  *
  *   npm install --no-save --prefix .github/pages/scripts playwright@1.51.0
  *   npx --prefix .github/pages/scripts playwright install chromium
  *   node .github/pages/scripts/capture-previews.mjs
+ *   node .github/pages/scripts/capture-previews.mjs sentence   # 특정 앱만
  */
 import { createRequire } from 'node:module'
 import { mkdirSync } from 'node:fs'
@@ -187,10 +188,91 @@ async function capturePoll(browser) {
   await context.close()
 }
 
+async function captureSentence(browser) {
+  const context = await browser.newContext({ viewport: VIEWPORT })
+  const consolePage = await context.newPage()
+
+  await consolePage.goto('http://localhost:3003/stream/sentence/', { waitUntil: 'networkidle' })
+  await consolePage.evaluate(() => localStorage.clear())
+  await consolePage.reload({ waitUntil: 'networkidle' })
+  await waitReady(consolePage, '.console-page')
+
+  await consolePage.locator('.title-display').first().click()
+  const titleInput = consolePage.locator('.title-input')
+  if (await titleInput.count()) {
+    await titleInput.fill('오늘 문장 만들기')
+    await titleInput.press('Enter')
+  }
+
+  // start()가 후보를 비우므로 수집을 먼저 연 뒤 후보를 넣습니다.
+  await consolePage.getByRole('button', { name: /수집 시작/ }).click()
+  await consolePage.waitForTimeout(300)
+
+  const candidatesBySection = [
+    ['왁굳형이', '고멤이', '이세돌이'],
+    ['숲속에서', '스튜디오에서', '카페에서'],
+    ['몰래', '신나게', '진지하게'],
+    ['도토리를', '마이크를', '키보드를'],
+    ['배고파서', '심심해서', '갑자기'],
+  ]
+  await consolePage.getByText('후보 모음').scrollIntoViewIfNeeded()
+  const panels = consolePage.locator('.candidate-panel:not(.disabled)')
+  for (let i = 0; i < candidatesBySection.length; i += 1) {
+    const panel = panels.nth(i)
+    const input = panel.getByPlaceholder('수동 추가')
+    for (const text of candidatesBySection[i]) {
+      await input.fill(text)
+      await input.press('Enter')
+      await consolePage.waitForTimeout(80)
+    }
+  }
+  await consolePage.waitForFunction(() => {
+    try {
+      const raw = localStorage.getItem('stream-sentence:snapshot:v1')
+      if (!raw) return false
+      const parsed = JSON.parse(raw)
+      const sections = parsed.sentence?.sections
+      if (!sections) return false
+      return (
+        parsed.sentence.phase === 'collecting' &&
+        sections.every((s) => !s.enabled || (s.entries?.length ?? 0) >= 1)
+      )
+    } catch {
+      return false
+    }
+  })
+
+  await consolePage.getByRole('button', { name: '바로 전체 뽑기' }).click()
+
+  const overlay = await context.newPage()
+  await overlay.goto('http://localhost:3003/stream/sentence/overlay/', {
+    waitUntil: 'networkidle',
+  })
+  await waitReady(overlay, '.overlay-root')
+  await overlay.waitForSelector('.overlay-sentence', { state: 'visible', timeout: 15000 })
+  await overlay.addStyleTag({ content: OVERLAY_BG })
+  // 컨페티가 살짝 퍼진 컷
+  await overlay.waitForTimeout(700)
+
+  const out = path.join(outDir, 'sentence.png')
+  await overlay.screenshot({ path: out, type: 'png' })
+  console.log(`[capture] ${out}`)
+  await context.close()
+}
+
+const only = process.argv[2]
+const targets =
+  only === 'roulette'
+    ? [captureRoulette]
+    : only === 'poll'
+      ? [capturePoll]
+      : only === 'sentence'
+        ? [captureSentence]
+        : [captureRoulette, capturePoll, captureSentence]
+
 const browser = await chromium.launch({ headless: true })
 try {
-  await captureRoulette(browser)
-  await capturePoll(browser)
+  for (const capture of targets) await capture(browser)
 } finally {
   await browser.close()
 }
