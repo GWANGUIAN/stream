@@ -215,4 +215,4 @@ Private. 비공식 API 사용은 각 플랫폼 이용약관을 확인한 뒤 본
 | 도네이션 랜덤 룰렛 | SOOP · 치지직 도네이션으로 아이템이 등록되는 방송용 랜덤 룰렛. 조작 페이지와 OBS 투명 오버레이 포함. | [https://gwanguian.github.io/stream/roulette/](https://gwanguian.github.io/stream/roulette/) |
 | 채팅 투표 | SOOP · 치지직 채팅(`!투표 N`)으로 진행하는 방송용 실시간 투표. 타이머·결과 공개·오버레이 포함. | [https://gwanguian.github.io/stream/poll/](https://gwanguian.github.io/stream/poll/) |
 
-> GitHub Pages는 `main` 푸시 시 Actions로 배포됩니다. 정적 호스팅이라 로컬 `pnpm dev`의 채팅 SSE API는 포함되지 않으며, 라이브 채팅 연동은 Node 호스트의 `NEXT_PUBLIC_CHAT_SSE_BASE`가 필요할 수 있습니다.
+> GitHub Pages는 Settings → Pages → Source를 **GitHub Actions**로 켠 뒤, `main` 푸시 시 Actions로 배포됩니다. 정적 호스팅이라 로컬 `pnpm dev`의 채팅 SSE API는 포함되지 않으며, 라이브 채팅 연동은 Node 호스트의 `NEXT_PUBLIC_CHAT_SSE_BASE`가 필요할 수 있습니다.

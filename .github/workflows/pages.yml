@@ -1,3 +1,6 @@
+# GitHub Pages 배포.
+# 저장소 Settings → Pages → Build and deployment → Source 를
+# "GitHub Actions"로 켜 두어야 deploy job이 성공합니다.
 name: Deploy GitHub Pages
 
 on:
@@ -50,6 +53,8 @@ jobs:
       - name: Assemble Pages site
         run: |
           mkdir -p _site
+          # underscore 경로(_next 등)가 Jekyll에 의해 무시되지 않도록 합니다.
+          touch _site/.nojekyll
           cp -r apps/roulette/out _site/roulette
           cp -r apps/poll/out _site/poll
           node .github/pages/build-index.mjs _site
