@@ -84,7 +84,7 @@ export function Console() {
       <TimerDisplay store={store} timer={snapshot.timer} />
 
       <div className="console-body">
-        <div className="console-col">
+        <div className="console-stage">
           <div className="wheel-stage">
             <Wheel
               items={snapshot.items}
@@ -111,10 +111,10 @@ export function Console() {
           </div>
         </div>
 
-        <div className="console-col">
+        <aside className="console-side">
           <TimerBar store={store} timer={snapshot.timer} />
           <ItemList store={store} items={snapshot.items} />
-        </div>
+        </aside>
       </div>
 
       <LogFeed log={snapshot.log} />
