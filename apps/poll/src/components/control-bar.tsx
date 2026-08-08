@@ -1,6 +1,16 @@
 'use client'
 
-import { History, Play, RotateCcw, Sparkles, Square } from 'lucide-react'
+import { MAX_POLL_OPTIONS } from '@stream/poll'
+import {
+  History,
+  Infinity as InfinityIcon,
+  Play,
+  Plus,
+  RotateCcw,
+  Sparkles,
+  Square,
+  Timer,
+} from 'lucide-react'
 import type { PollStore, PollStoreSnapshot } from '@/lib/store'
 
 export interface ControlBarProps {
@@ -9,23 +19,89 @@ export interface ControlBarProps {
   onOpenHistory: () => void
 }
 
+const DURATION_PRESETS = [30, 60, 120, 180] as const
+
 export function ControlBar({ store, snapshot, onOpenHistory }: ControlBarProps) {
   const { phase, options, durationSec } = snapshot
   const validOptionCount = options.filter((o) => o.label.trim()).length
   const canStart = validOptionCount >= 2
+  const canAddOption = options.length < MAX_POLL_OPTIONS
 
   return (
     <div className="control-bar">
       {phase === 'idle' && (
-        <button
-          type="button"
-          className="btn btn-primary btn-lg"
-          disabled={!canStart}
-          onClick={() => store.engine.start()}
-        >
-          <Play size={18} />
-          {durationSec > 0 ? `${durationSec}초 투표 시작` : '투표 시작 (무제한)'}
-        </button>
+        <div className="control-bar-idle">
+          <div className="control-bar-tools" aria-label="타이머 설정">
+            <span className="control-bar-tools-label">
+              <Timer size={14} />
+              타이머
+            </span>
+            <div className="duration-presets control-duration-presets">
+              {DURATION_PRESETS.map((sec) => (
+                <button
+                  key={sec}
+                  type="button"
+                  className={`pill ${durationSec === sec ? 'active' : ''}`}
+                  onClick={() => store.engine.setDurationSec(sec)}
+                >
+                  {sec}초
+                </button>
+              ))}
+              <button
+                type="button"
+                className={`pill ${durationSec === 0 ? 'active' : ''}`}
+                onClick={() => store.engine.setDurationSec(0)}
+                title="시간 제한 없음"
+              >
+                <InfinityIcon size={14} />
+                무제한
+              </button>
+            </div>
+            <label className={`control-duration-custom ${durationSec > 0 ? 'active' : ''}`}>
+              <input
+                type="number"
+                min={5}
+                step={5}
+                value={durationSec > 0 ? durationSec : ''}
+                placeholder="초"
+                aria-label="타이머 초 직접 입력"
+                onChange={(e) => {
+                  const raw = e.target.value
+                  if (raw === '') {
+                    store.engine.setDurationSec(0)
+                    return
+                  }
+                  store.engine.setDurationSec(Math.max(5, Number(raw) || 5))
+                }}
+              />
+              <span>초</span>
+            </label>
+            <button
+              type="button"
+              className="btn btn-sm btn-secondary"
+              onClick={() => store.engine.addOption(`항목 ${options.length + 1}`)}
+              disabled={!canAddOption}
+              title={
+                canAddOption
+                  ? '투표 항목 추가'
+                  : `최대 ${MAX_POLL_OPTIONS}개까지 추가할 수 있어요`
+              }
+            >
+              <Plus size={15} />
+              항목 추가
+            </button>
+          </div>
+
+          <button
+            type="button"
+            className="btn btn-primary btn-lg"
+            disabled={!canStart}
+            onClick={() => store.engine.start()}
+          >
+            <Play size={18} />
+            {durationSec > 0 ? `${durationSec}초 투표 시작` : '투표 시작 (무제한)'}
+          </button>
+        </div>
       )}
 
       {phase === 'running' && (

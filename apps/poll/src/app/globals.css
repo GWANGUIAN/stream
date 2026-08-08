@@ -966,6 +966,90 @@ textarea {
   padding-top: 0.3rem;
 }
 
+.control-bar-idle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.control-bar-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  padding: 0.45rem 0.65rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  background: var(--glass);
+}
+
+.control-bar-tools-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.control-duration-presets {
+  flex-wrap: wrap;
+}
+
+.control-duration-presets .pill {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.78rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.control-duration-custom {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--glass-strong);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.control-duration-custom.active {
+  border-color: var(--accent);
+  color: var(--text);
+  background: var(--accent-soft);
+}
+
+.control-duration-custom input {
+  width: 3.4rem;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-family: var(--font-mono);
+  text-align: right;
+  padding: 0.1rem 0;
+  outline: none;
+}
+
+.control-duration-custom input::-webkit-outer-spin-button,
+.control-duration-custom input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.control-duration-custom input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 .control-bar-secondary {
   display: flex;
   gap: 0.5rem;
