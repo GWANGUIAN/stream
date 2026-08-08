@@ -1,6 +1,14 @@
 'use client'
 
-import { Dices, History, Play, RotateCcw, Square } from 'lucide-react'
+import {
+  Dices,
+  History,
+  Infinity as InfinityIcon,
+  Play,
+  RotateCcw,
+  Square,
+  Timer,
+} from 'lucide-react'
 import type { SentenceStore, SentenceStoreSnapshot } from '@/lib/store'
 
 export interface ControlBarProps {
@@ -10,6 +18,8 @@ export interface ControlBarProps {
   animating?: boolean
 }
 
+const DURATION_PRESETS = [30, 60, 120, 180] as const
+
 export function ControlBar({ store, snapshot, onOpenHistory, animating }: ControlBarProps) {
   const { phase, durationSec, sections } = snapshot
   const hasCandidates = sections.some((s) => s.enabled && s.entries.length > 0)
@@ -17,14 +27,63 @@ export function ControlBar({ store, snapshot, onOpenHistory, animating }: Contro
   return (
     <div className="control-bar">
       {(phase === 'idle' || phase === 'revealed') && (
-        <button
-          type="button"
-          className="btn btn-primary btn-lg"
-          onClick={() => store.engine.start()}
-        >
-          <Play size={18} />
-          {durationSec > 0 ? `${durationSec}초 수집 시작` : '수집 시작 (무제한)'}
-        </button>
+        <div className="control-bar-idle">
+          <div className="control-bar-tools" aria-label="타이머 설정">
+            <span className="control-bar-tools-label">
+              <Timer size={14} />
+              타이머
+            </span>
+            <div className="duration-presets control-duration-presets">
+              {DURATION_PRESETS.map((sec) => (
+                <button
+                  key={sec}
+                  type="button"
+                  className={`pill ${durationSec === sec ? 'active' : ''}`}
+                  onClick={() => store.engine.setDurationSec(sec)}
+                >
+                  {sec}초
+                </button>
+              ))}
+              <button
+                type="button"
+                className={`pill ${durationSec === 0 ? 'active' : ''}`}
+                onClick={() => store.engine.setDurationSec(0)}
+                title="시간 제한 없음"
+              >
+                <InfinityIcon size={14} />
+                무제한
+              </button>
+            </div>
+            <label className={`control-duration-custom ${durationSec > 0 ? 'active' : ''}`}>
+              <input
+                type="number"
+                min={5}
+                step={5}
+                value={durationSec > 0 ? durationSec : ''}
+                placeholder="초"
+                aria-label="타이머 초 직접 입력"
+                onChange={(e) => {
+                  const raw = e.target.value
+                  if (raw === '') {
+                    store.engine.setDurationSec(0)
+                    return
+                  }
+                  store.engine.setDurationSec(Math.max(5, Number(raw) || 5))
+                }}
+              />
+              <span>초</span>
+            </label>
+          </div>
+
+          <button
+            type="button"
+            className="btn btn-primary btn-lg"
+            onClick={() => store.engine.start()}
+          >
+            <Play size={18} />
+            {durationSec > 0 ? `${durationSec}초 수집 시작` : '수집 시작 (무제한)'}
+          </button>
+        </div>
       )}
 
       {phase === 'collecting' && (
