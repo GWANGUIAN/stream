@@ -52,7 +52,7 @@ const html = `<!doctype html>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>stream</title>
-<meta name="description" content="방송용 도구 모음" />
+<meta name="description" content="SOOP · 치지직 방송용 도구 모음" />
 <link rel="icon" href="./favicon.ico" type="image/x-icon" />
 <style>
   :root {
@@ -172,7 +172,7 @@ const html = `<!doctype html>
 <body>
 <main>
   <h1>stream<span>.</span></h1>
-  <p class="lead">방송용 도구 모음</p>
+  <p class="lead">SOOP · 치지직 방송용 도구 모음</p>
   <nav class="list">${cards}
   </nav>
   <footer>
