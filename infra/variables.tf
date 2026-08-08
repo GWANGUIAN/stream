@@ -33,3 +33,8 @@ variable "github_oidc_provider_arn" {
   type        = string
   default     = ""
 }
+
+variable "budget_notification_email" {
+  description = "Email for AWS Budgets alerts and the $20 stop-action subscriber"
+  type        = string
+}

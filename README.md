@@ -221,4 +221,6 @@ Private. 비공식 API 사용은 각 플랫폼 이용약관을 확인한 뒤 본
 | 채팅 투표 | SOOP · 치지직 채팅(`!투표 N`)으로 진행하는 방송용 실시간 투표. 타이머·결과 공개·오버레이 포함. | [/poll/](https://streamcontent.click/poll/) | [/stream/poll/](https://gwanguian.github.io/stream/poll/) |
 | 이어말하기 | 채팅으로 문장을 이어가는 방송용 컨텐츠. | [/sentence/](https://streamcontent.click/sentence/) | [/stream/sentence/](https://gwanguian.github.io/stream/sentence/) |
 
-> Pages는 Settings → Pages → Source를 **GitHub Actions**로 켠 뒤 `main` 푸시 시 배포됩니다. AWS는 `.github/workflows/aws-static.yml`이 같은 푸시에서 OIDC로 S3에 sync 합니다. 정적 호스팅이라 로컬 `pnpm dev`의 채팅 SSE API는 포함되지 않으며, 라이브 채팅 연동은 Node 호스트의 `NEXT_PUBLIC_CHAT_SSE_BASE`가 필요할 수 있습니다.
+> Pages는 Settings → Pages → Source를 **GitHub Actions**로 켠 뒤 `main` 푸시 시 배포됩니다. AWS는 `.github/workflows/aws-static.yml`이 같은 푸시에서 OIDC로 S3에 sync 합니다. 라이브 채팅은 EC2 프록시 [`https://chat.streamcontent.click/api/chat`](https://chat.streamcontent.click/api/chat)를 CI가 `NEXT_PUBLIC_CHAT_SSE_BASE`로 주입합니다. 계정 월 비용이 **$20**에 도달하면 AWS Budgets가 프록시 EC2를 자동 중지합니다(재기동은 [`infra/README.md`](infra/README.md)).
+>
+> 채팅 연동 내부 검증(랜딩 미등록): [AWS `/chat-test/`](https://streamcontent.click/chat-test/) · [Pages `/stream/chat-test/`](https://gwanguian.github.io/stream/chat-test/)

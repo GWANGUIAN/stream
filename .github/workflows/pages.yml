@@ -42,18 +42,29 @@ jobs:
         working-directory: apps/roulette
         env:
           NEXT_PUBLIC_BASE_PATH: /stream/roulette
+          NEXT_PUBLIC_CHAT_SSE_BASE: https://chat.streamcontent.click/api/chat
         run: pnpm run build:pages
 
       - name: Build poll (static export)
         working-directory: apps/poll
         env:
           NEXT_PUBLIC_BASE_PATH: /stream/poll
+          NEXT_PUBLIC_CHAT_SSE_BASE: https://chat.streamcontent.click/api/chat
         run: pnpm run build:pages
 
       - name: Build sentence (static export)
         working-directory: apps/sentence
         env:
           NEXT_PUBLIC_BASE_PATH: /stream/sentence
+          NEXT_PUBLIC_CHAT_SSE_BASE: https://chat.streamcontent.click/api/chat
+        run: pnpm run build:pages
+
+      # 랜딩(apps.json)에는 올리지 않는 내부 검증용 앱
+      - name: Build chat-test (static export)
+        working-directory: apps/chat-test
+        env:
+          NEXT_PUBLIC_BASE_PATH: /stream/chat-test
+          NEXT_PUBLIC_CHAT_SSE_BASE: https://chat.streamcontent.click/api/chat
         run: pnpm run build:pages
 
       - name: Assemble Pages site
@@ -64,6 +75,7 @@ jobs:
           cp -r apps/roulette/out _site/roulette
           cp -r apps/poll/out _site/poll
           cp -r apps/sentence/out _site/sentence
+          cp -r apps/chat-test/out _site/chat-test
           node .github/pages/build-index.mjs _site
 
       - name: Upload Pages artifact

@@ -39,22 +39,34 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       # custom domain 루트 배포: /stream 접두사 없이 앱 경로만 사용합니다.
+      # 채팅은 EC2 프록시(chat.streamcontent.click)를 기본으로 사용합니다.
       - name: Build roulette (static export)
         working-directory: apps/roulette
         env:
           NEXT_PUBLIC_BASE_PATH: /roulette
+          NEXT_PUBLIC_CHAT_SSE_BASE: https://chat.streamcontent.click/api/chat
         run: pnpm run build:pages
 
       - name: Build poll (static export)
         working-directory: apps/poll
         env:
           NEXT_PUBLIC_BASE_PATH: /poll
+          NEXT_PUBLIC_CHAT_SSE_BASE: https://chat.streamcontent.click/api/chat
         run: pnpm run build:pages
 
       - name: Build sentence (static export)
         working-directory: apps/sentence
         env:
           NEXT_PUBLIC_BASE_PATH: /sentence
+          NEXT_PUBLIC_CHAT_SSE_BASE: https://chat.streamcontent.click/api/chat
+        run: pnpm run build:pages
+
+      # 랜딩(apps.json)에는 올리지 않는 내부 검증용 앱
+      - name: Build chat-test (static export)
+        working-directory: apps/chat-test
+        env:
+          NEXT_PUBLIC_BASE_PATH: /chat-test
+          NEXT_PUBLIC_CHAT_SSE_BASE: https://chat.streamcontent.click/api/chat
         run: pnpm run build:pages
 
       - name: Assemble site
@@ -63,6 +75,7 @@ jobs:
           cp -r apps/roulette/out _site/roulette
           cp -r apps/poll/out _site/poll
           cp -r apps/sentence/out _site/sentence
+          cp -r apps/chat-test/out _site/chat-test
           node .github/pages/build-index.mjs _site
           # CloudFront 403/404 매핑용 최소 페이지
           printf '%s\n' \

@@ -1,0 +1,35 @@
+{
+  "name": "@stream/chat-test-app",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --port 3004 --webpack",
+    "build": "next build",
+    "build:pages": "node ./scripts/build-pages.mjs",
+    "start": "next start --port 3004",
+    "typecheck": "tsc --noEmit",
+    "clean": "node -e \"const fs=require('node:fs'); for (const p of ['.next','.turbo','out']) fs.rmSync(p,{recursive:true,force:true})\""
+  },
+  "dependencies": {
+    "@stream/auth": "workspace:*",
+    "@stream/chat": "workspace:*",
+    "@stream/core": "workspace:*",
+    "@stream/sse": "workspace:*",
+    "@stream/ui": "workspace:*",
+    "lucide-react": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@stream/config": "workspace:*",
+    "@tailwindcss/postcss": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:"
+  }
+}

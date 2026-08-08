@@ -7,3 +7,6 @@ project_name       = "stream"
 
 # Required when the account already has a GitHub OIDC provider (EntityAlreadyExists).
 # github_oidc_provider_arn = "arn:aws:iam::ACCOUNT_ID:oidc-provider/token.actions.githubusercontent.com"
+
+# AWS Budgets ($20) alerts + automatic EC2 stop action subscriber (must be a real inbox).
+budget_notification_email = "you@example.com"

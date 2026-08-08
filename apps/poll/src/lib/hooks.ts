@@ -47,8 +47,8 @@ export function useOverlaySnapshot(): PollStoreSnapshot | null {
   return useSyncExternalStore(subscribe, getSnapshot, () => null)
 }
 
-// 정적 export(GitHub Pages 등) 빌드에는 채팅 SSE 프록시(API 라우트)가 없습니다.
-// Node 호스트가 따로 있으면 NEXT_PUBLIC_CHAT_SSE_BASE로 그 API를 가리키게 설정하세요.
+// 정적 export에는 앱 API 라우트가 없습니다. CI는 NEXT_PUBLIC_CHAT_SSE_BASE로
+// chat.streamcontent.click 프록시를 주입합니다. 없을 때만 연결을 막습니다.
 const CHAT_SSE_BASE = process.env.NEXT_PUBLIC_CHAT_SSE_BASE
 const IS_STATIC_EXPORT = process.env.NEXT_PUBLIC_STATIC_EXPORT === 'true'
 
@@ -80,7 +80,9 @@ export function useChatConnection(onEvent: (event: ChatSseClientEvent) => void):
 
     if (IS_STATIC_EXPORT && !CHAT_SSE_BASE) {
       setStatus('error')
-      setMessage('정적 배포에서는 NEXT_PUBLIC_CHAT_SSE_BASE로 채팅 서버를 지정해야 합니다.')
+      setMessage(
+        '채팅 프록시 URL이 없습니다. NEXT_PUBLIC_CHAT_SSE_BASE를 설정하거나 리허설·수동 등록을 이용하세요.',
+      )
       return
     }
 

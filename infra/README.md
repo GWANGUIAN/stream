@@ -37,6 +37,9 @@ gh workflow run aws-static.yml
 | `aws_region` | Variable `AWS_REGION` |
 | `s3_bucket_name` | Variable `AWS_S3_BUCKET` |
 | `cloudfront_distribution_id` | Variable `AWS_CLOUDFRONT_DISTRIBUTION_ID` |
+| `chat_proxy_artifact_bucket` | Variable `AWS_CHAT_PROXY_ARTIFACT_BUCKET` |
+| `chat_proxy_instance_id` | Variable `AWS_CHAT_PROXY_INSTANCE_ID` |
+| `chat_proxy_url` | Variable `NEXT_PUBLIC_CHAT_SSE_BASE` (참고용; 워크플로에는 URL이 하드코딩됨) |
 
 이미 계정에 GitHub OIDC provider가 있으면 apply가 충돌할 수 있습니다.
 그때는 provider ARN을 넘겨 재사용합니다:
@@ -48,22 +51,27 @@ github_oidc_provider_arn = "arn:aws:iam::ACCOUNT_ID:oidc-provider/token.actions.
 
 ## GitHub 설정
 
-1. 저장소 → **Settings → Environments → New environment** → 이름 `aws-static`
-2. Environment / repository Secrets:
-   - `AWS_DEPLOY_ROLE_ARN` = `terraform output -raw deploy_role_arn`
-3. Environment / repository Variables:
-   - `AWS_REGION` = `terraform output -raw aws_region`
-   - `AWS_S3_BUCKET` = `terraform output -raw s3_bucket_name`
-   - `AWS_CLOUDFRONT_DISTRIBUTION_ID` = `terraform output -raw cloudfront_distribution_id`
-4. Actions에서 **Deploy AWS Static** → Run workflow (`workflow_dispatch`)
+워크플로는 **repository** Secrets/Variables를 사용합니다 (`aws-static` environment 불필요).
 
-CLI로 등록 예시 (`gh` 사용):
+1. Secrets:
+   - `AWS_DEPLOY_ROLE_ARN` = `terraform output -raw deploy_role_arn`
+2. Variables:
+   - `AWS_REGION`
+   - `AWS_S3_BUCKET`
+   - `AWS_CLOUDFRONT_DISTRIBUTION_ID`
+   - `AWS_CHAT_PROXY_ARTIFACT_BUCKET`
+   - `AWS_CHAT_PROXY_INSTANCE_ID`
+3. Actions에서 **Deploy AWS Chat Proxy** → 이후 **Deploy AWS Static** / Pages
+
+CLI로 등록 (`infra/scripts/apply-and-configure-github.ps1`이 동일 작업을 수행):
 
 ```bash
-gh secret set AWS_DEPLOY_ROLE_ARN --env aws-static --body "$(terraform -chdir=infra output -raw deploy_role_arn)"
-gh variable set AWS_REGION --env aws-static --body "$(terraform -chdir=infra output -raw aws_region)"
-gh variable set AWS_S3_BUCKET --env aws-static --body "$(terraform -chdir=infra output -raw s3_bucket_name)"
-gh variable set AWS_CLOUDFRONT_DISTRIBUTION_ID --env aws-static --body "$(terraform -chdir=infra output -raw cloudfront_distribution_id)"
+gh secret set AWS_DEPLOY_ROLE_ARN --body "$(terraform -chdir=infra output -raw deploy_role_arn)"
+gh variable set AWS_REGION --body "$(terraform -chdir=infra output -raw aws_region)"
+gh variable set AWS_S3_BUCKET --body "$(terraform -chdir=infra output -raw s3_bucket_name)"
+gh variable set AWS_CLOUDFRONT_DISTRIBUTION_ID --body "$(terraform -chdir=infra output -raw cloudfront_distribution_id)"
+gh variable set AWS_CHAT_PROXY_ARTIFACT_BUCKET --body "$(terraform -chdir=infra output -raw chat_proxy_artifact_bucket)"
+gh variable set AWS_CHAT_PROXY_INSTANCE_ID --body "$(terraform -chdir=infra output -raw chat_proxy_instance_id)"
 ```
 
 ## A. GitHub Actions OIDC (배포용, 권장)
@@ -122,14 +130,36 @@ $env:AWS_DEFAULT_REGION="ap-northeast-2"
 ## D. 첫 배포 체크리스트
 
 1. `aws configure` (또는 env) 완료
-2. `cd infra && terraform apply`
-3. GitHub environment `aws-static` + secret/variables 등록
-4. Actions → Deploy AWS Static → Run workflow
-5. `https://streamcontent.click/`, `/roulette/`, `/poll/`, `/sentence/` 확인
-6. Pages URL (`…/stream/…`) 회귀 확인
+2. `infra/terraform.tfvars`에 `budget_notification_email` 설정 (실제 수신 가능한 메일)
+3. `.\infra\scripts\apply-and-configure-github.ps1` 또는 `terraform apply` + 위 `gh` 등록
+4. Actions → **Deploy AWS Chat Proxy** → `https://chat.streamcontent.click/health` 확인
+5. Actions → Deploy AWS Static / Pages
+6. 앱에서 채널 연결 스모크
+
+## E. 채팅 프록시 (`chat.streamcontent.click`)
+
+- EC2 `t4g.nano` + Caddy(Let's Encrypt) + Node SSE (`apps/chat-proxy`)
+- 경로: `GET /api/chat/{platform}/stream?channelId=...`, `GET /health`
+- 배포: `.github/workflows/aws-chat-proxy.yml` (S3 아티팩트 → SSM `chat-proxy-deploy`)
+- 예상 월 비용(프록시): 약 $7–10. 정적 호스팅 포함해도 보통 $20 미만
+
+### $20 예산 자동 중지
+
+- AWS Budgets `stream-monthly-20`: 계정 월 COST **$20**
+- 80% 이메일 알림, **100% actual** 시 Budgets Action이 프록시 EC2를 `STOP`
+- 정적 사이트는 유지되고 채팅만 끊깁니다
+- 다음 달 예산이 리셋돼도 인스턴스는 자동으로 켜지지 않습니다. 재기동:
+
+```powershell
+$env:Path = "$env:ProgramFiles\Amazon\AWSCLIV2;" + $env:Path
+aws ec2 start-instances --region ap-northeast-2 --instance-ids "$(terraform -chdir=infra output -raw chat_proxy_instance_id)"
+```
+
+- Budgets 알림/액션 메일은 AWS에서 구독 확인이 필요할 수 있습니다. `budget_notification_email`은 noreply가 아닌 실제 메일함을 권장합니다
+- EIP는 인스턴스 중지 중에도 공인 IPv4 요금이 소액 발생할 수 있습니다
 
 ## Notes
 
 - Terraform state는 기본 로컬(`infra/terraform.tfstate`, gitignore). 팀 사용 시 S3 backend 추가 권장.
 - ACM 인증서는 CloudFront 때문에 **us-east-1** 에 생성됩니다.
-- 정적 호스팅이라 앱 API 라우트는 포함되지 않습니다 (Pages와 동일).
+- 정적 호스팅 앱에는 API 라우트가 없고, 채팅은 `chat.streamcontent.click` 프록시를 사용합니다.

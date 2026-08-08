@@ -71,6 +71,49 @@ data "aws_iam_policy_document" "github_deploy" {
     actions   = ["cloudfront:CreateInvalidation", "cloudfront:GetInvalidation", "cloudfront:ListInvalidations"]
     resources = [aws_cloudfront_distribution.site.arn]
   }
+
+  statement {
+    sid    = "ChatProxyArtifactBucket"
+    effect = "Allow"
+    actions = [
+      "s3:ListBucket",
+      "s3:GetBucketLocation",
+    ]
+    resources = [aws_s3_bucket.chat_proxy_artifacts.arn]
+  }
+
+  statement {
+    sid    = "ChatProxyArtifactObjects"
+    effect = "Allow"
+    actions = [
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:DeleteObject",
+    ]
+    resources = ["${aws_s3_bucket.chat_proxy_artifacts.arn}/*"]
+  }
+
+  statement {
+    sid    = "ChatProxySsm"
+    effect = "Allow"
+    actions = [
+      "ssm:SendCommand",
+      "ssm:GetCommandInvocation",
+      "ssm:ListCommandInvocations",
+      "ssm:DescribeInstanceInformation",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "ChatProxyEc2Describe"
+    effect = "Allow"
+    actions = [
+      "ec2:DescribeInstances",
+      "ec2:DescribeInstanceStatus",
+    ]
+    resources = ["*"]
+  }
 }
 
 resource "aws_iam_role_policy" "github_deploy" {

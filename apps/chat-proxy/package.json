@@ -1,0 +1,25 @@
+{
+  "name": "@stream/chat-proxy",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "node ./scripts/build.mjs",
+    "start": "node dist/server.mjs",
+    "typecheck": "tsc --noEmit",
+    "clean": "node -e \"const fs=require('node:fs'); for (const p of ['dist','.turbo']) fs.rmSync(p,{recursive:true,force:true})\""
+  },
+  "dependencies": {
+    "@stream/auth": "workspace:*",
+    "@stream/core": "workspace:*",
+    "@stream/sse": "workspace:*"
+  },
+  "devDependencies": {
+    "@stream/config": "workspace:*",
+    "@types/node": "catalog:",
+    "esbuild": "^0.25.9",
+    "tsx": "^4.20.5",
+    "typescript": "catalog:"
+  }
+}

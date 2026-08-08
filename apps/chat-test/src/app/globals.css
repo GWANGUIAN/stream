@@ -1,0 +1,351 @@
+@import "@stream/ui/styles.css";
+@source "./**/*.{ts,tsx}";
+
+:root {
+  --bg-0: #0a0f18;
+  --bg-1: #111827;
+  --glass: rgba(255, 255, 255, 0.05);
+  --line: rgba(255, 255, 255, 0.1);
+  --text: #f3f6fc;
+  --muted: #93a0be;
+  --accent: #5eead4;
+  --accent-soft: rgba(94, 234, 212, 0.14);
+  --donation: #ffcb57;
+  --donation-soft: rgba(255, 203, 87, 0.14);
+  --danger: #ff6b81;
+  --ok: #3fe0a8;
+  --warn: #fbbf24;
+  --font-display: var(--font-display-face, "Jua"), "Malgun Gothic", sans-serif;
+  --font-body: var(--font-body-face, "Gowun Dodum"), "Malgun Gothic", sans-serif;
+  --font-mono: var(--font-mono-face, "JetBrains Mono"), monospace;
+  --radius: 1rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(900px 500px at 8% -10%, rgba(94, 234, 212, 0.12), transparent 55%),
+    radial-gradient(800px 480px at 100% 0%, rgba(47, 157, 255, 0.1), transparent 50%),
+    linear-gradient(175deg, var(--bg-1), var(--bg-0));
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 3rem;
+}
+
+.hero {
+  margin-bottom: 1.25rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--accent);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  font-weight: 400;
+}
+
+.lede {
+  margin: 0.55rem 0 0;
+  max-width: 42rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.layout {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(260px, 320px) 1fr;
+}
+
+@media (max-width: 860px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sidebar {
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+.panel {
+  background: var(--glass);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1rem 1.05rem 1.1rem;
+  backdrop-filter: blur(10px);
+}
+
+.panel h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 400;
+}
+
+.panel-sub {
+  margin: 0.3rem 0 0.9rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 0.85rem;
+}
+
+.field-label {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.field input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 0.7rem;
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--text);
+  padding: 0.65rem 0.75rem;
+  outline: none;
+}
+
+.field input:focus {
+  border-color: rgba(94, 234, 212, 0.55);
+}
+
+.pill-group {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 2.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.pill.active {
+  opacity: 1;
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.pill .brand-mark {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.field-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: 1px solid transparent;
+  border-radius: 0.7rem;
+  padding: 0.55rem 0.85rem;
+  cursor: pointer;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn.primary {
+  background: var(--accent-soft);
+  border-color: rgba(94, 234, 212, 0.35);
+  color: #d7fff7;
+  flex: 1;
+}
+
+.btn.danger {
+  background: rgba(255, 107, 129, 0.14);
+  border-color: rgba(255, 107, 129, 0.35);
+  color: #ffd0d7;
+  flex: 1;
+}
+
+.btn.ghost {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--muted);
+}
+
+.status-line,
+.meta-line {
+  margin: 0.7rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  word-break: break-all;
+}
+
+.meta-line {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.dot {
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  margin-right: 0.35rem;
+  background: var(--muted);
+  vertical-align: middle;
+}
+
+.dot.ok {
+  background: var(--ok);
+}
+
+.dot.err {
+  background: var(--danger);
+}
+
+.dot.warn {
+  background: var(--warn);
+}
+
+.feed-panel {
+  min-height: 28rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.feed-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.filter {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+  font-size: 0.82rem;
+}
+
+.filter.active {
+  color: var(--text);
+  border-color: rgba(94, 234, 212, 0.4);
+  background: var(--accent-soft);
+}
+
+.feed {
+  list-style: none;
+  margin: 0.85rem 0 0;
+  padding: 0;
+  overflow: auto;
+  max-height: min(70vh, 640px);
+  display: grid;
+  gap: 0.45rem;
+}
+
+.feed-empty {
+  color: var(--muted);
+  padding: 1.5rem 0.25rem;
+}
+
+.feed-item {
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  padding: 0.55rem 0.7rem;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.feed-item.donation {
+  border-color: rgba(255, 203, 87, 0.35);
+  background: var(--donation-soft);
+}
+
+.feed-item.message {
+  border-color: rgba(94, 234, 212, 0.2);
+}
+
+.feed-item.meta {
+  opacity: 0.85;
+}
+
+.feed-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  margin-bottom: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.type-tag {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+.feed-item.donation .type-tag {
+  color: var(--donation);
+}
+
+.feed-text {
+  margin: 0;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
