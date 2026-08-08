@@ -1,0 +1,64 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # 새 앱을 Pages에 추가할 때: 아래에 빌드 스텝을 하나 더 추가하고
+      # `_site/<app>/`로 결과물을 복사한 뒤, .github/pages/apps.json에 항목을 추가하세요.
+      - name: Build roulette (static export)
+        working-directory: apps/roulette
+        env:
+          NEXT_PUBLIC_BASE_PATH: /stream/roulette
+        run: pnpm run build:pages
+
+      - name: Assemble Pages site
+        run: |
+          mkdir -p _site
+          cp -r apps/roulette/out _site/roulette
+          node .github/pages/build-index.mjs _site
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

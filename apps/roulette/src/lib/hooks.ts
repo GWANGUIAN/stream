@@ -47,6 +47,11 @@ export function useOverlaySnapshot(): RouletteSnapshot | null {
   return useSyncExternalStore(subscribe, getSnapshot, () => null)
 }
 
+// 정적 export(GitHub Pages 등) 빌드에는 채팅 SSE 프록시(API 라우트)가 없습니다.
+// Node 호스트가 따로 있으면 NEXT_PUBLIC_CHAT_SSE_BASE로 그 API를 가리키게 설정하세요.
+const CHAT_SSE_BASE = process.env.NEXT_PUBLIC_CHAT_SSE_BASE
+const IS_STATIC_EXPORT = process.env.NEXT_PUBLIC_STATIC_EXPORT === 'true'
+
 export type ConnectionStatus = 'idle' | 'connecting' | 'connected' | 'error'
 
 export interface ChatConnection {
@@ -73,11 +78,19 @@ export function useChatConnection(onEvent: (event: ChatSseClientEvent) => void):
       return
     }
 
+    if (!CHAT_SSE_BASE && IS_STATIC_EXPORT) {
+      setStatus('error')
+      setMessage(
+        'GitHub Pages 배포에서는 채팅 프록시를 쓸 수 없습니다. 리허설·수동 등록을 이용하세요.',
+      )
+      return
+    }
+
     setStatus('connecting')
     setMessage('연결 중…')
 
     subRef.current = subscribeChatSse({
-      url: chatSseUrl('/api/chat', platform, id),
+      url: chatSseUrl(CHAT_SSE_BASE ?? '/api/chat', platform, id),
       onEvent: (event) => {
         if (event.type === 'hello') {
           setStatus('connected')

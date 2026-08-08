@@ -2,6 +2,7 @@
 
 import type { RouletteSnapshot } from '@stream/roulette'
 import { useState } from 'react'
+import { withBasePath } from '@/lib/base-path'
 import type { RouletteStore } from '@/lib/store'
 import { ItemManager } from './item-manager'
 import { RehearsalPanel } from './rehearsal-panel'
@@ -20,7 +21,7 @@ export function MenuDrawer({ store, snapshot, open, onClose, onOpenHistory }: Me
   const [copied, setCopied] = useState(false)
 
   function copyOverlayUrl() {
-    const url = `${window.location.origin}/overlay`
+    const url = `${window.location.origin}${withBasePath('/overlay/')}`
     void navigator.clipboard.writeText(url)
     setCopied(true)
     window.setTimeout(() => setCopied(false), 1600)

@@ -1,5 +1,9 @@
 import type { NextConfig } from 'next'
 
+// GitHub Pages 등 정적 호스팅용 빌드일 때만 켭니다. 일반 dev/Node 빌드에는 영향 없음.
+const isStaticExport = process.env.NEXT_PUBLIC_STATIC_EXPORT === 'true'
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? ''
+
 const nextConfig: NextConfig = {
   // 워크스페이스 패키지를 소스 그대로 transpile합니다.
   transpilePackages: [
@@ -17,6 +21,15 @@ const nextConfig: NextConfig = {
   experimental: {
     useTypeScriptCli: true,
   },
+  ...(isStaticExport
+    ? {
+        output: 'export',
+        basePath,
+        assetPrefix: basePath,
+        trailingSlash: true,
+        images: { unoptimized: true },
+      }
+    : {}),
 }
 
 export default nextConfig

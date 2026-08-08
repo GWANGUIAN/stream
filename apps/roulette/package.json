@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "next dev --port 3001 --webpack",
     "build": "next build",
+    "build:pages": "node ./scripts/build-pages.mjs",
     "start": "next start --port 3001",
     "typecheck": "tsc --noEmit",
     "clean": "node -e \"const fs=require('node:fs'); for (const p of ['.next','.turbo']) fs.rmSync(p,{recursive:true,force:true})\""
