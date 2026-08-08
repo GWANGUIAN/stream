@@ -30,6 +30,8 @@ export interface LogEntry {
   kind: LogKind
   message: string
   platform?: Platform
+  /** 시청자 닉네임이 있으면 로그 UI에서 색상 강조에 사용합니다. */
+  nickname?: string
   at: number
 }
 

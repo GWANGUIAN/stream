@@ -1022,8 +1022,8 @@ textarea {
   animation: log-line-in 180ms ease-out;
 }
 
-.vote-log-line b {
-  color: var(--brand);
+.vote-log-line .log-nick {
+  font-weight: 800;
 }
 
 @keyframes log-line-in {
@@ -1514,8 +1514,8 @@ textarea {
   animation: log-line-in 180ms ease-out;
 }
 
-.overlay-log-line b {
-  color: #1fd8c4;
+.overlay-log-line .log-nick {
+  font-weight: 800;
 }
 
 .overlay-empty {

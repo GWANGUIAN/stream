@@ -1,6 +1,7 @@
 'use client'
 
 import type { PollFeedEntry, PollOptionResult } from '@stream/poll'
+import { colorForNickname } from '@stream/ui'
 import confetti from 'canvas-confetti'
 import { CheckCircle2, Circle, Lock, Play } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -151,11 +152,17 @@ export function OverlayView() {
           <p key={toast.id} className="overlay-log-line">
             {showOptionInLog ? (
               <>
-                <b>{toast.nickname}</b> → {toast.optionLabel}
+                <b className="log-nick" style={{ color: colorForNickname(toast.nickname) }}>
+                  {toast.nickname}
+                </b>{' '}
+                → {toast.optionLabel}
               </>
             ) : (
               <>
-                <b>{toast.nickname}</b>님이 투표했어요
+                <b className="log-nick" style={{ color: colorForNickname(toast.nickname) }}>
+                  {toast.nickname}
+                </b>
+                님이 투표했어요
               </>
             )}
           </p>

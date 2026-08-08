@@ -937,6 +937,10 @@ textarea {
   animation: log-line-in 180ms ease-out;
 }
 
+.log-line .log-nick {
+  font-weight: 800;
+}
+
 .log-line.registered {
   color: var(--text);
 }
@@ -1209,6 +1213,10 @@ textarea {
   max-width: 100%;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.75);
   animation: log-line-in 180ms ease-out;
+}
+
+.overlay-log-line .log-nick {
+  font-weight: 800;
 }
 
 .overlay-empty {

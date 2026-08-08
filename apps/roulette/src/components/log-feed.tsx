@@ -1,10 +1,28 @@
 'use client'
 
 import type { LogEntry } from '@stream/roulette'
+import { colorForNickname } from '@stream/ui'
 import { useEffect, useRef, useState } from 'react'
 
 export interface LogFeedProps {
   log: LogEntry[]
+}
+
+function LogLineText({ entry }: { entry: LogEntry }) {
+  const nick = entry.nickname?.trim()
+  if (!nick) return entry.message
+
+  const rest = entry.message.startsWith(nick)
+    ? entry.message.slice(nick.length)
+    : ` ${entry.message}`
+  return (
+    <>
+      <b className="log-nick" style={{ color: colorForNickname(nick) }}>
+        {nick}
+      </b>
+      {rest}
+    </>
+  )
 }
 
 /**
@@ -51,7 +69,7 @@ export function LogFeed({ log }: LogFeedProps) {
   return (
     <div className="log-feed" aria-live="polite">
       <p key={current.id} className={`log-line ${current.kind}`}>
-        {current.message}
+        <LogLineText entry={current} />
       </p>
     </div>
   )

@@ -19,4 +19,5 @@ export {
 export { Input } from './components/input'
 export { Label } from './components/label'
 export { Separator } from './components/separator'
+export { colorForNickname, hashNickname } from './lib/nickname-color'
 export { cn } from './lib/utils'

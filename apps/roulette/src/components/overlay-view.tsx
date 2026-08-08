@@ -1,9 +1,27 @@
 'use client'
 
 import type { LogEntry } from '@stream/roulette'
+import { colorForNickname } from '@stream/ui'
 import { useEffect, useRef, useState } from 'react'
 import { useOverlaySnapshot } from '@/lib/hooks'
 import { Wheel } from './wheel'
+
+function LogLineText({ entry }: { entry: LogEntry }) {
+  const nick = entry.nickname?.trim()
+  if (!nick) return entry.message
+
+  const rest = entry.message.startsWith(nick)
+    ? entry.message.slice(nick.length)
+    : ` ${entry.message}`
+  return (
+    <>
+      <b className="log-nick" style={{ color: colorForNickname(nick) }}>
+        {nick}
+      </b>
+      {rest}
+    </>
+  )
+}
 
 /**
  * OBS 브라우저 소스에 그대로 붙여넣는 읽기 전용 화면.
@@ -71,7 +89,7 @@ export function OverlayView() {
       {toast && (
         <div className="overlay-toast-stack" aria-live="polite">
           <p key={toast.id} className="overlay-log-line">
-            {toast.message}
+            <LogLineText entry={toast} />
           </p>
         </div>
       )}

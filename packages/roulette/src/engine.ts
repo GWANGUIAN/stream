@@ -364,11 +364,13 @@ export class RouletteEngine {
         'rejected',
         `${event.user.nickname}님의 ${terms.currency} ${event.amount}${terms.unit} 후원이 반영되지 않았습니다. (${reasonText})`,
         event.platform,
+        event.user.nickname,
       )
       this.pushHistory(
         'rejected',
         `${event.user.nickname} ${terms.currency} ${event.amount} → 거절(${reasonText})`,
         event.platform,
+        event.user.nickname,
       )
       this.notify()
       return
@@ -388,8 +390,8 @@ export class RouletteEngine {
     const remainderText = outcome.remainder > 0 ? ` (잔여 ${outcome.remainder}${terms.unit})` : ''
     const message = `${event.user.nickname}님이 ${terms.currency} ${event.amount}${terms.unit} 쏴서 "${item.label}" ${outcome.count}개 등록${remainderText}`
 
-    this.pushLog('registered', message, event.platform)
-    this.pushHistory('registered', message, event.platform)
+    this.pushLog('registered', message, event.platform, event.user.nickname)
+    this.pushHistory('registered', message, event.platform, event.user.nickname)
     this.notify()
   }
 
@@ -464,13 +466,32 @@ export class RouletteEngine {
 
   // ---------------------------------------------------------------- log / history
 
-  private pushLog(kind: LogKind, message: string, platform?: Platform): void {
-    const entry: LogEntry = { id: this.idFactory(), kind, message, platform, at: this.now() }
+  private pushLog(kind: LogKind, message: string, platform?: Platform, nickname?: string): void {
+    const entry: LogEntry = {
+      id: this.idFactory(),
+      kind,
+      message,
+      platform,
+      nickname,
+      at: this.now(),
+    }
     this.log = [...this.log.slice(-(this.logLimit - 1)), entry]
   }
 
-  private pushHistory(kind: LogKind, message: string, platform?: Platform): void {
-    const entry: LogEntry = { id: this.idFactory(), kind, message, platform, at: this.now() }
+  private pushHistory(
+    kind: LogKind,
+    message: string,
+    platform?: Platform,
+    nickname?: string,
+  ): void {
+    const entry: LogEntry = {
+      id: this.idFactory(),
+      kind,
+      message,
+      platform,
+      nickname,
+      at: this.now(),
+    }
     this.history = [...this.history.slice(-(this.historyLimit - 1)), entry]
   }
 

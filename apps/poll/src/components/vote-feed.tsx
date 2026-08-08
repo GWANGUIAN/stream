@@ -1,6 +1,7 @@
 'use client'
 
 import type { PollFeedEntry } from '@stream/poll'
+import { colorForNickname } from '@stream/ui'
 import { useEffect, useRef, useState } from 'react'
 
 export interface VoteFeedProps {
@@ -48,16 +49,24 @@ export function VoteFeed({ feed, showOption }: VoteFeedProps) {
 
   if (!current) return null
 
+  const nickColor = colorForNickname(current.nickname)
+
   return (
     <div className="vote-feed" aria-live="polite">
       <p key={current.id} className="vote-log-line">
         {showOption ? (
           <>
-            <b>{current.nickname}</b> → {current.optionLabel}
+            <b className="log-nick" style={{ color: nickColor }}>
+              {current.nickname}
+            </b>{' '}
+            → {current.optionLabel}
           </>
         ) : (
           <>
-            <b>{current.nickname}</b>님이 투표했어요
+            <b className="log-nick" style={{ color: nickColor }}>
+              {current.nickname}
+            </b>
+            님이 투표했어요
           </>
         )}
       </p>
