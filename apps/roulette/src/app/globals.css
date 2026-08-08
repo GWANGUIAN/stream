@@ -429,20 +429,18 @@ textarea {
 }
 
 /*
- * 로고 토글은 기본 pill의 테두리/배경을 쓰지 않고, 흰 배경 칩(brand-mark-chip) 하나만
- * 보여줍니다(테두리가 이중으로 겹쳐 보이는 것을 방지). 두 플랫폼 모두 칩 자체의 크기는
- * 동일하고, 로고 크기만 실제 비율에 맞게 칩 안에서 다르게 잡습니다.
+ * 로고 토글은 기본 pill(타원형 보더/배경)을 완전히 끄고, 흰 배경 칩만 씁니다.
+ * `.pill.active` / `.pill.soop.active` 보다 특이도를 높여 타원 보더가 다시 뜨지 않게 합니다.
  */
-.pill-mark {
-  padding: 0.2rem;
+.pill.pill-mark,
+.pill.pill-mark.active,
+.pill.pill-mark.soop.active,
+.pill.pill-mark.chzzk.active {
+  padding: 0;
   background: transparent;
-  border-color: transparent;
-}
-
-.pill-mark.soop.active,
-.pill-mark.chzzk.active {
-  background: transparent;
-  border-color: transparent;
+  border: none;
+  border-radius: 0.55rem;
+  box-shadow: none;
 }
 
 .brand-mark-chip {

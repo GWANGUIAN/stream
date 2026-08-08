@@ -41,10 +41,17 @@ jobs:
           NEXT_PUBLIC_BASE_PATH: /stream/roulette
         run: pnpm run build:pages
 
+      - name: Build poll (static export)
+        working-directory: apps/poll
+        env:
+          NEXT_PUBLIC_BASE_PATH: /stream/poll
+        run: pnpm run build:pages
+
       - name: Assemble Pages site
         run: |
           mkdir -p _site
           cp -r apps/roulette/out _site/roulette
+          cp -r apps/poll/out _site/poll
           node .github/pages/build-index.mjs _site
 
       - name: Upload Pages artifact

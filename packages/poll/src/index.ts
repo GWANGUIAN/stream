@@ -1,2 +1,18 @@
-export type { PollConfig, PollOption, PollResult } from './poll'
-export { createPollEngine, PollEngine, pickGiveawayWinner } from './poll'
+export type {
+  PollEngineOptions,
+  PollFeedEntry,
+  PollHistoryEntry,
+  PollListener,
+  PollOption,
+  PollOptionResult,
+  PollPhase,
+  PollSettings,
+  PollSnapshot,
+} from './poll'
+export {
+  createPollEngine,
+  DEFAULT_VOTE_PREFIX,
+  MAX_POLL_OPTIONS,
+  PollEngine,
+  pickGiveawayWinner,
+} from './poll'
