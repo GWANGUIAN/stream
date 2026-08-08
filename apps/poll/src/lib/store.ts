@@ -1,6 +1,6 @@
 'use client'
 
-import type { Platform } from '@stream/core'
+import { createScheduleFlush, type Platform } from '@stream/core'
 import { createEventBus, type EventBus } from '@stream/events'
 import { PollEngine, type PollSnapshot } from '@stream/poll'
 import type { ChatSseClientEvent } from '@stream/sse/client'
@@ -42,9 +42,14 @@ function persist(state: PersistedState): void {
   }
 }
 
+/** Overlay only needs totals/feed — omit the full votes map from BroadcastChannel. */
+function toOverlaySnapshot(snapshot: PollStoreSnapshot): PollStoreSnapshot {
+  return { ...snapshot, votes: {} }
+}
+
 /**
  * 조작 페이지가 소유하는 엔진 하나를 감싸, React가 구독할 수 있는 스냅샷 스토어로 노출합니다.
- * 스냅샷이 바뀔 때마다 localStorage에 저장하고 BroadcastChannel로 오버레이 탭에 알립니다.
+ * 스냅샷 변경은 rAF로 합쳐 localStorage·BroadcastChannel·React에 알립니다.
  */
 export class PollStore {
   readonly engine: PollEngine
@@ -53,6 +58,7 @@ export class PollStore {
   private connection: ConnectionState = { platform: 'soop', streamerId: '' }
   private snapshot: PollStoreSnapshot
   private readonly listeners = new Set<() => void>()
+  private readonly scheduleFlush: () => void
 
   constructor() {
     this.engine = new PollEngine()
@@ -69,9 +75,10 @@ export class PollStore {
         : null
 
     this.snapshot = { ...this.engine.getSnapshot(), ...this.connection }
+    this.scheduleFlush = createScheduleFlush(() => this.flush())
     this.engine.onChange((pollSnapshot) => {
       this.snapshot = { ...pollSnapshot, ...this.connection }
-      this.persistAndBroadcast()
+      this.scheduleFlush()
     })
   }
 
@@ -87,7 +94,7 @@ export class PollStore {
   setSource(platform: Platform, streamerId: string): void {
     this.connection = { platform, streamerId: streamerId.trim() }
     this.snapshot = { ...this.snapshot, ...this.connection }
-    this.persistAndBroadcast()
+    this.scheduleFlush()
   }
 
   /** 채팅 SSE에서 받은 이벤트를 엔진에 흘려보냅니다(채팅 메시지만 실제로 반영됩니다). */
@@ -96,9 +103,9 @@ export class PollStore {
     this.bus.emit(event)
   }
 
-  private persistAndBroadcast(): void {
+  private flush(): void {
     persist({ poll: this.snapshot, connection: this.connection })
-    this.channel?.postMessage(this.snapshot)
+    this.channel?.postMessage(toOverlaySnapshot(this.snapshot))
     for (const listener of this.listeners) listener()
   }
 }

@@ -23,7 +23,9 @@ export function Console() {
     },
     [store],
   )
-  const connection = useChatConnection(onChatEvent)
+  const connection = useChatConnection(onChatEvent, {
+    types: ['donation', 'status'],
+  })
   const connected = connection.status === 'connected'
 
   const handleSpin = useCallback(() => {

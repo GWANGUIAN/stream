@@ -1,6 +1,6 @@
 'use client'
 
-import type { Platform } from '@stream/core'
+import { createScheduleFlush, type Platform } from '@stream/core'
 import { createEventBus, type EventBus } from '@stream/events'
 import { SentenceEngine, type SentenceSnapshot } from '@stream/sentence'
 import type { ChatSseClientEvent } from '@stream/sse/client'
@@ -42,6 +42,20 @@ function persist(state: PersistedState): void {
   }
 }
 
+/** Overlay does not render contributors — strip them from BroadcastChannel payloads. */
+function toOverlaySnapshot(snapshot: SentenceStoreSnapshot): SentenceStoreSnapshot {
+  return {
+    ...snapshot,
+    sections: snapshot.sections.map((section) => ({
+      ...section,
+      entries: section.entries.map((entry) => ({
+        ...entry,
+        contributors: [],
+      })),
+    })),
+  }
+}
+
 /**
  * 조작 페이지가 소유하는 엔진 하나를 감싸, React가 구독할 수 있는 스냅샷 스토어로 노출합니다.
  */
@@ -52,6 +66,7 @@ export class SentenceStore {
   private connection: ConnectionState = { platform: 'soop', streamerId: '' }
   private snapshot: SentenceStoreSnapshot
   private readonly listeners = new Set<() => void>()
+  private readonly scheduleFlush: () => void
 
   constructor() {
     this.engine = new SentenceEngine()
@@ -68,9 +83,10 @@ export class SentenceStore {
         : null
 
     this.snapshot = { ...this.engine.getSnapshot(), ...this.connection }
+    this.scheduleFlush = createScheduleFlush(() => this.flush())
     this.engine.onChange((sentenceSnapshot) => {
       this.snapshot = { ...sentenceSnapshot, ...this.connection }
-      this.persistAndBroadcast()
+      this.scheduleFlush()
     })
   }
 
@@ -86,7 +102,7 @@ export class SentenceStore {
   setSource(platform: Platform, streamerId: string): void {
     this.connection = { platform, streamerId: streamerId.trim() }
     this.snapshot = { ...this.snapshot, ...this.connection }
-    this.persistAndBroadcast()
+    this.scheduleFlush()
   }
 
   ingest(event: ChatSseClientEvent): void {
@@ -94,9 +110,9 @@ export class SentenceStore {
     this.bus.emit(event)
   }
 
-  private persistAndBroadcast(): void {
+  private flush(): void {
     persist({ sentence: this.snapshot, connection: this.connection })
-    this.channel?.postMessage(this.snapshot)
+    this.channel?.postMessage(toOverlaySnapshot(this.snapshot))
     for (const listener of this.listeners) listener()
   }
 }

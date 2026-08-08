@@ -116,6 +116,43 @@ describe('PollEngine', () => {
     expect(snapshot.totalVotes).toBe(0)
     expect(snapshot.options).toHaveLength(3)
   })
+
+  it('다량 투표 후에도 러닝 토탈이 votes 맵과 일치합니다', () => {
+    const poll = makeEngine()
+    poll.setAllowMultipleVotes(true)
+    poll.start(60)
+    for (let i = 0; i < 200; i += 1) {
+      const option = (i % 3) + 1
+      poll.handleVoteMessage(chat(`u${i}`, `!투표 ${option}`))
+    }
+    const snapshot = poll.getSnapshot()
+    const fromVotes = snapshot.options.map((option) => ({
+      id: option.id,
+      votes: Object.values(snapshot.votes).reduce(
+        (sum, records) => sum + records.filter((r) => r.optionId === option.id).length,
+        0,
+      ),
+    }))
+    for (const expected of fromVotes) {
+      expect(snapshot.totals.find((t) => t.id === expected.id)?.votes).toBe(expected.votes)
+    }
+    expect(snapshot.totalVotes).toBe(200)
+  })
+
+  it('loadSnapshot 후 러닝 토탈을 복원합니다', () => {
+    const poll = makeEngine()
+    poll.start(60)
+    poll.handleVoteMessage(chat('a', '!투표 1'))
+    poll.handleVoteMessage(chat('b', '!투표 2'))
+    const saved = poll.getSnapshot()
+
+    const restored = makeEngine()
+    restored.loadSnapshot(saved)
+    const snapshot = restored.getSnapshot()
+    expect(snapshot.totalVotes).toBe(2)
+    expect(snapshot.totals.find((t) => t.label === '치킨')?.votes).toBe(1)
+    expect(snapshot.totals.find((t) => t.label === '피자')?.votes).toBe(1)
+  })
 })
 
 describe('pickGiveawayWinner', () => {

@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@stream/auth": "workspace:*",
+    "@stream/chat": "workspace:*",
     "@stream/core": "workspace:*",
     "@stream/sse": "workspace:*"
   },

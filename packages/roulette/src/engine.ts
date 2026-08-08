@@ -80,7 +80,7 @@ export class RouletteEngine {
     this.rule = { ...DEFAULT_DONATION_RULE, ...options.rule }
     this.weightMode = options.weightMode ?? 'proportional'
     this.winnerAction = options.winnerAction ?? 'keep'
-    this.logLimit = options.logLimit ?? 50
+    this.logLimit = options.logLimit ?? 8
     this.historyLimit = options.historyLimit ?? 500
     this.now = options.now ?? Date.now
     this.idFactory = options.idFactory ?? (() => defaultId('id'))

@@ -1,4 +1,5 @@
 export * from './errors'
 export * from './http'
+export * from './schedule'
 export * from './schema'
 export * from './types'

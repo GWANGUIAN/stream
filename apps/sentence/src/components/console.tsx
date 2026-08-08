@@ -39,7 +39,15 @@ export function Console() {
     },
     [store],
   )
-  const connection = useChatConnection(onChatEvent)
+  const messagePrefixes =
+    snapshot?.sections
+      .filter((section) => section.enabled)
+      .map((section) => section.prefix.trim())
+      .filter(Boolean) ?? []
+  const connection = useChatConnection(onChatEvent, {
+    types: ['message', 'status'],
+    prefixes: messagePrefixes.length > 0 ? messagePrefixes : undefined,
+  })
   const connected = connection.status === 'connected'
 
   const handleAnimatingChange = useCallback((animating: boolean) => {

@@ -1,5 +1,6 @@
 'use client'
 
+import { createScheduleFlush } from '@stream/core'
 import { createEventBus, type EventBus } from '@stream/events'
 import { RouletteEngine, type RouletteSnapshot } from '@stream/roulette'
 import type { ChatSseClientEvent } from '@stream/sse/client'
@@ -28,7 +29,7 @@ function persist(snapshot: RouletteSnapshot): void {
 
 /**
  * 조작 페이지가 소유하는 엔진 하나를 감싸, React가 구독할 수 있는 스냅샷 스토어로 노출합니다.
- * 스냅샷이 바뀔 때마다 localStorage에 저장하고 BroadcastChannel로 오버레이 탭에 알립니다.
+ * 스냅샷 변경은 rAF로 합쳐 localStorage·BroadcastChannel·React에 알립니다.
  */
 export class RouletteStore {
   readonly engine: RouletteEngine
@@ -36,6 +37,7 @@ export class RouletteStore {
   private readonly channel: BroadcastChannel | null
   private snapshot: RouletteSnapshot
   private readonly listeners = new Set<() => void>()
+  private readonly scheduleFlush: () => void
 
   constructor() {
     this.engine = new RouletteEngine()
@@ -51,11 +53,10 @@ export class RouletteStore {
         : null
 
     this.snapshot = this.engine.getSnapshot()
+    this.scheduleFlush = createScheduleFlush(() => this.flush())
     this.engine.onChange((next) => {
       this.snapshot = next
-      persist(next)
-      this.channel?.postMessage(next)
-      for (const listener of this.listeners) listener()
+      this.scheduleFlush()
     })
   }
 
@@ -72,6 +73,12 @@ export class RouletteStore {
   ingest(event: ChatSseClientEvent): void {
     if (event.type === 'hello') return
     this.bus.emit(event)
+  }
+
+  private flush(): void {
+    persist(this.snapshot)
+    this.channel?.postMessage(this.snapshot)
+    for (const listener of this.listeners) listener()
   }
 }
 

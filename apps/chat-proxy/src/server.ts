@@ -1,8 +1,9 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http'
 import { isPlatform } from '@stream/core'
-import { createChatSseResponse } from '@stream/sse/server'
+import { createChatSseResponse, parseChatSseSearchParams } from '@stream/sse/server'
 import { corsHeaders, resolveCorsOrigin } from './cors'
 import { chatCredential } from './credential'
+import { acquireChatClient } from './hub'
 
 const PORT = Number(process.env.PORT ?? 3080)
 const HOST = process.env.HOST ?? '127.0.0.1'
@@ -85,21 +86,39 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse): Promise
       return
     }
 
-    const channelId = url.searchParams.get('channelId')?.trim() ?? ''
+    const { channelId, types, messagePrefixes } = parseChatSseSearchParams(url.searchParams)
+    if (!channelId) {
+      writeJson(res, 400, { error: 'channelId가 필요합니다.' }, cors)
+      return
+    }
+
     const ac = new AbortController()
     const onClose = () => ac.abort()
     req.once('close', onClose)
 
+    let release: (() => void) | undefined
     try {
-      const web = createChatSseResponse({
+      const acquired = await acquireChatClient({
         platform: platformRaw,
         channelId,
         credential: chatCredential(platformRaw),
+      })
+      release = acquired.release
+
+      const web = createChatSseResponse({
+        platform: platformRaw,
+        channelId,
+        client: acquired.client,
+        ownsClient: false,
+        manageConnection: false,
+        types,
+        messagePrefixes,
         signal: ac.signal,
       })
       await pipeWebResponse(web, res, cors)
     } finally {
       req.off('close', onClose)
+      release?.()
     }
     return
   }

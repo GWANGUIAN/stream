@@ -167,6 +167,8 @@ export class SentenceEngine {
   private feed: SentenceFeedEntry[] = []
   private history: SentenceHistoryEntry[] = []
   private spinSeq = 0
+  /** Sum of all entry counts across sections; kept in sync with mutations. */
+  private totalEntryCount = 0
 
   /** 섹션별 닉네임 → 기여한 entry id 목록 (중복 투표 제어용). */
   private voterEntries = new Map<SectionId, Map<string, string[]>>()
@@ -183,7 +185,7 @@ export class SentenceEngine {
     this.title = options.title?.trim() || '랜덤 문장 만들기'
     this.settings = { ...DEFAULT_SETTINGS, ...options.settings }
     this.durationSec = options.durationSec ?? 90
-    this.feedLimit = options.feedLimit ?? 50
+    this.feedLimit = options.feedLimit ?? 8
     this.historyLimit = options.historyLimit ?? 50
     this.now = options.now ?? Date.now
     this.idFactory = options.idFactory ?? (() => defaultId('id'))
@@ -360,6 +362,8 @@ export class SentenceEngine {
   clearSection(id: SectionId): void {
     const section = this.sections.find((s) => s.id === id)
     if (!section) return
+    const removed = section.entries.reduce((sum, e) => sum + e.count, 0)
+    this.totalEntryCount = Math.max(0, this.totalEntryCount - removed)
     section.entries = []
     this.voterEntries.get(id)?.clear()
     delete this.picks[id]
@@ -370,9 +374,10 @@ export class SentenceEngine {
   removeEntry(sectionId: SectionId, entryId: string): void {
     const section = this.sections.find((s) => s.id === sectionId)
     if (!section) return
-    const before = section.entries.length
+    const target = section.entries.find((e) => e.id === entryId)
+    if (!target) return
+    this.totalEntryCount = Math.max(0, this.totalEntryCount - target.count)
     section.entries = section.entries.filter((e) => e.id !== entryId)
-    if (section.entries.length === before) return
 
     const voters = this.voterEntries.get(sectionId)
     if (voters) {
@@ -419,6 +424,14 @@ export class SentenceEngine {
     for (const map of this.voterEntries.values()) {
       map.clear()
     }
+    this.totalEntryCount = 0
+  }
+
+  private rebuildTotalEntryCount(): void {
+    this.totalEntryCount = this.sections.reduce(
+      (sum, s) => sum + s.entries.reduce((inner, e) => inner + e.count, 0),
+      0,
+    )
   }
 
   private enabledSections(): SectionState[] {
@@ -603,6 +616,7 @@ export class SentenceEngine {
       section.entries = [...section.entries, entry]
     }
     entry.count += 1
+    this.totalEntryCount += 1
     entry.contributors = [...entry.contributors.slice(-19), { nickname, at }]
 
     const list = voters.get(nickname) ?? []
@@ -616,7 +630,10 @@ export class SentenceEngine {
   private decrementOrRemoveEntry(section: SectionState, entryId: string, nickname: string): void {
     const entry = section.entries.find((e) => e.id === entryId)
     if (!entry) return
-    entry.count = Math.max(0, entry.count - 1)
+    if (entry.count > 0) {
+      entry.count -= 1
+      this.totalEntryCount = Math.max(0, this.totalEntryCount - 1)
+    }
     const idx = entry.contributors.findLastIndex((c) => c.nickname === nickname)
     if (idx >= 0) {
       entry.contributors = [
@@ -651,10 +668,6 @@ export class SentenceEngine {
         contributors: [...e.contributors],
       })),
     }))
-    const totalEntries = sections.reduce(
-      (sum, s) => sum + s.entries.reduce((inner, e) => inner + e.count, 0),
-      0,
-    )
 
     return {
       phase: this.phase,
@@ -668,7 +681,7 @@ export class SentenceEngine {
       result: this.result ? { ...this.result, picks: [...this.result.picks] } : null,
       feed: [...this.feed],
       history: this.history.map((h) => ({ ...h, picks: [...h.picks] })),
-      totalEntries,
+      totalEntries: this.totalEntryCount,
       updatedAt: this.now(),
     }
   }
@@ -726,6 +739,7 @@ export class SentenceEngine {
         }
         this.voterEntries.set(id, map)
       }
+      this.rebuildTotalEntryCount()
     }
     this.notify()
   }

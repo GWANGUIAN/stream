@@ -1,7 +1,12 @@
 'use client'
 
 import type { Platform } from '@stream/core'
-import { type ChatSseClientEvent, chatSseUrl, subscribeChatSse } from '@stream/sse/client'
+import {
+  type ChatSseClientEvent,
+  type ChatSseUrlOptions,
+  chatSseUrl,
+  subscribeChatSse,
+} from '@stream/sse/client'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { withBasePath } from './base-path'
 import {
@@ -13,6 +18,12 @@ import {
 
 function noopSubscribe(): () => void {
   return () => {}
+}
+
+function filterKey(filter?: ChatSseUrlOptions): string {
+  const types = filter?.types?.slice().sort().join(',') ?? ''
+  const prefixes = filter?.prefixes?.map((p) => p.trim()).filter(Boolean).sort().join('\0') ?? ''
+  return `${types}|${prefixes}`
 }
 
 export function useSentenceStore(): {
@@ -64,12 +75,20 @@ export interface ChatConnection {
   disconnect: () => void
 }
 
-export function useChatConnection(onEvent: (event: ChatSseClientEvent) => void): ChatConnection {
+export function useChatConnection(
+  onEvent: (event: ChatSseClientEvent) => void,
+  filter?: ChatSseUrlOptions,
+): ChatConnection {
   const [status, setStatus] = useState<ConnectionStatus>('idle')
   const [message, setMessage] = useState('')
   const subRef = useRef<ReturnType<typeof subscribeChatSse> | null>(null)
   const onEventRef = useRef(onEvent)
   onEventRef.current = onEvent
+  const filterRef = useRef(filter)
+  filterRef.current = filter
+  const activeRef = useRef<{ platform: Platform; streamerId: string } | null>(null)
+  const statusRef = useRef(status)
+  statusRef.current = status
 
   const connect = useCallback((platform: Platform, streamerId: string) => {
     subRef.current?.close()
@@ -89,11 +108,12 @@ export function useChatConnection(onEvent: (event: ChatSseClientEvent) => void):
     }
 
     const base = CHAT_SSE_BASE ?? withBasePath('/api/chat')
+    activeRef.current = { platform, streamerId: id }
     setStatus('connecting')
     setMessage('연결 중…')
 
     subRef.current = subscribeChatSse({
-      url: chatSseUrl(base, platform, id),
+      url: chatSseUrl(base, platform, id, filterRef.current),
       onOpen: () => {
         setStatus('connected')
         setMessage('연결됨')
@@ -109,9 +129,18 @@ export function useChatConnection(onEvent: (event: ChatSseClientEvent) => void):
   const disconnect = useCallback(() => {
     subRef.current?.close()
     subRef.current = null
+    activeRef.current = null
     setStatus('idle')
     setMessage('')
   }, [])
+
+  const currentFilterKey = filterKey(filter)
+  useEffect(() => {
+    const active = activeRef.current
+    if (!active) return
+    if (statusRef.current !== 'connected' && statusRef.current !== 'connecting') return
+    connect(active.platform, active.streamerId)
+  }, [currentFilterKey, connect])
 
   useEffect(() => {
     return () => {

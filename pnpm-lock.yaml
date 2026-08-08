@@ -101,6 +101,9 @@ importers:
       '@stream/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@stream/chat':
+        specifier: workspace:*
+        version: link:../../packages/chat
       '@stream/core':
         specifier: workspace:*
         version: link:../../packages/core

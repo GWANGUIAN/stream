@@ -26,7 +26,11 @@ export function Console() {
     },
     [store],
   )
-  const connection = useChatConnection(onChatEvent)
+  const votePrefix = snapshot?.settings.votePrefix?.trim() || '!투표'
+  const connection = useChatConnection(onChatEvent, {
+    types: ['message', 'status'],
+    prefixes: [votePrefix],
+  })
   const connected = connection.status === 'connected'
 
   const handlePrimaryAction = useCallback(() => {

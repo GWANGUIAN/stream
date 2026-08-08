@@ -24,6 +24,11 @@ export interface ChatSseSubscription {
   readonly readyState: number
 }
 
+export interface ChatSseUrlOptions {
+  types?: string[]
+  prefixes?: string[]
+}
+
 /**
  * 브라우저에서 채팅 SSE를 구독합니다.
  * URL은 보통 `/api/chat/{platform}/stream?channelId=...` 형태입니다.
@@ -55,7 +60,21 @@ export function subscribeChatSse(options: SubscribeChatSseOptions): ChatSseSubsc
   }
 }
 
-export function chatSseUrl(basePath: string, platform: Platform, channelId: string): string {
+export function chatSseUrl(
+  basePath: string,
+  platform: Platform,
+  channelId: string,
+  options?: ChatSseUrlOptions,
+): string {
   const root = basePath.replace(/\/$/, '')
-  return `${root}/${platform}/stream?channelId=${encodeURIComponent(channelId)}`
+  const qs = new URLSearchParams()
+  qs.set('channelId', channelId)
+  if (options?.types && options.types.length > 0) {
+    qs.set('types', options.types.join(','))
+  }
+  for (const prefix of options?.prefixes ?? []) {
+    const trimmed = prefix.trim()
+    if (trimmed) qs.append('prefix', trimmed)
+  }
+  return `${root}/${platform}/stream?${qs.toString()}`
 }

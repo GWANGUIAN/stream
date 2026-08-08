@@ -110,6 +110,9 @@ export class PollEngine {
   private startedAt: number | null = null
   private endsAt: number | null = null
   private votesByVoter = new Map<string, VoteRecord[]>()
+  /** Running per-option vote counts; kept in sync with `votesByVoter`. */
+  private countsByOption = new Map<string, number>()
+  private totalVoteCount = 0
   private feed: PollFeedEntry[] = []
   private history: PollHistoryEntry[] = []
 
@@ -124,7 +127,7 @@ export class PollEngine {
     this.title = options.title?.trim() || '실시간 투표'
     this.settings = { ...DEFAULT_SETTINGS, ...options.settings }
     this.durationSec = options.durationSec ?? 60
-    this.feedLimit = options.feedLimit ?? 40
+    this.feedLimit = options.feedLimit ?? 8
     this.historyLimit = options.historyLimit ?? 50
     this.now = options.now ?? Date.now
     this.idFactory = options.idFactory ?? (() => defaultId('id'))
@@ -234,7 +237,7 @@ export class PollEngine {
     this.phase = 'running'
     this.startedAt = this.now()
     this.endsAt = this.durationSec > 0 ? this.startedAt + this.durationSec * 1000 : null
-    this.votesByVoter.clear()
+    this.clearVotes()
     this.feed = []
     this.notify()
     return true
@@ -286,7 +289,7 @@ export class PollEngine {
     this.phase = 'idle'
     this.startedAt = null
     this.endsAt = null
-    this.votesByVoter.clear()
+    this.clearVotes()
     this.feed = []
     this.notify()
   }
@@ -354,8 +357,14 @@ export class PollEngine {
     if (this.settings.allowMultipleVotes) {
       const list = this.votesByVoter.get(nickname) ?? []
       this.votesByVoter.set(nickname, [...list, record])
+      this.adjustCount(option.id, 1)
     } else {
+      const previous = this.votesByVoter.get(nickname)
+      if (previous) {
+        for (const old of previous) this.adjustCount(old.optionId, -1)
+      }
       this.votesByVoter.set(nickname, [record])
+      this.adjustCount(option.id, 1)
     }
 
     this.pushFeed(nickname, option.label)
@@ -388,16 +397,41 @@ export class PollEngine {
 
   // ---------------------------------------------------------------- results
 
-  private computeResults(): PollOptionResult[] {
-    const rawTotals = this.options.map((option) => {
-      let votes = 0
-      for (const records of this.votesByVoter.values()) {
-        votes += records.filter((r) => r.optionId === option.id).length
-      }
-      return { id: option.id, label: option.label, votes }
-    })
+  private clearVotes(): void {
+    this.votesByVoter.clear()
+    this.countsByOption.clear()
+    this.totalVoteCount = 0
+  }
 
-    const totalVotes = rawTotals.reduce((sum, t) => sum + t.votes, 0)
+  private adjustCount(optionId: string, delta: number): void {
+    if (delta === 0) return
+    const current = this.countsByOption.get(optionId) ?? 0
+    const next = Math.max(0, current + delta)
+    const applied = next - current
+    if (applied === 0) return
+    if (next === 0) this.countsByOption.delete(optionId)
+    else this.countsByOption.set(optionId, next)
+    this.totalVoteCount = Math.max(0, this.totalVoteCount + applied)
+  }
+
+  private rebuildCountsFromVotes(): void {
+    this.countsByOption.clear()
+    this.totalVoteCount = 0
+    for (const records of this.votesByVoter.values()) {
+      for (const record of records) {
+        this.adjustCount(record.optionId, 1)
+      }
+    }
+  }
+
+  private computeResults(): PollOptionResult[] {
+    const rawTotals = this.options.map((option) => ({
+      id: option.id,
+      label: option.label,
+      votes: this.countsByOption.get(option.id) ?? 0,
+    }))
+
+    const totalVotes = this.totalVoteCount
     const sorted = [...rawTotals].sort((a, b) => b.votes - a.votes)
 
     let rank = 0
@@ -435,7 +469,7 @@ export class PollEngine {
       startedAt: this.startedAt,
       endsAt: this.endsAt,
       totals,
-      totalVotes: totals.reduce((sum, t) => sum + t.votes, 0),
+      totalVotes: this.totalVoteCount,
       winnerIds,
       feed: [...this.feed],
       votes: Object.fromEntries(
@@ -462,6 +496,7 @@ export class PollEngine {
     if (snapshot.feed) this.feed = [...snapshot.feed]
     if (snapshot.votes) {
       this.votesByVoter = new Map(Object.entries(snapshot.votes).map(([k, v]) => [k, [...v]]))
+      this.rebuildCountsFromVotes()
     }
     if (snapshot.history) this.history = [...snapshot.history]
     this.notify()

@@ -47,6 +47,20 @@ describe('SentenceEngine', () => {
     const who = engine.getSnapshot().sections.find((s) => s.id === 'who')
     expect(who?.entries).toHaveLength(1)
     expect(who?.entries[0]?.count).toBe(2)
+    expect(engine.getSnapshot().totalEntries).toBe(2)
+  })
+
+  it('totalEntries는 교체·삭제 후에도 합과 일치합니다', () => {
+    const engine = makeEngine()
+    engine.setAllowMultiplePerSection(false)
+    engine.start(60)
+    engine.handleChatMessage(chat('철수', '!누가 사슴이'))
+    engine.handleChatMessage(chat('철수', '!누가 토끼가'))
+    expect(engine.getSnapshot().totalEntries).toBe(1)
+    const who = engine.getSnapshot().sections.find((s) => s.id === 'who')
+    const entryId = who?.entries[0]?.id
+    if (entryId) engine.removeEntry('who', entryId)
+    expect(engine.getSnapshot().totalEntries).toBe(0)
   })
 
   it('기본값: 섹션별 중복 투표를 허용합니다', () => {
