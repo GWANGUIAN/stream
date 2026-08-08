@@ -2,12 +2,17 @@
 
 import { colorForIndex, type RouletteItem } from '@stream/roulette'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@stream/ui'
+import { Check, Copy } from 'lucide-react'
 import { useState } from 'react'
 import type { RouletteStore } from '@/lib/store'
 
 export interface ItemListProps {
   store: RouletteStore
   items: RouletteItem[]
+}
+
+function formatItemsForCopy(items: RouletteItem[]): string {
+  return items.map((item) => `${item.label}*${item.count}`).join(',')
 }
 
 function ItemRow({
@@ -63,6 +68,7 @@ function ItemRow({
 export function ItemList({ store, items }: ItemListProps) {
   const [newLabel, setNewLabel] = useState('')
   const [newCount, setNewCount] = useState(1)
+  const [copied, setCopied] = useState(false)
 
   function handleAdd() {
     const label = newLabel.trim()
@@ -70,6 +76,14 @@ export function ItemList({ store, items }: ItemListProps) {
     store.engine.addItem(label, Math.max(1, newCount))
     setNewLabel('')
     setNewCount(1)
+  }
+
+  function handleCopy() {
+    if (items.length === 0) return
+    void navigator.clipboard.writeText(formatItemsForCopy(items)).then(() => {
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 1600)
+    })
   }
 
   return (
@@ -112,7 +126,7 @@ export function ItemList({ store, items }: ItemListProps) {
         </div>
       </TooltipProvider>
 
-      <div className="field-row" style={{ marginTop: '0.8rem' }}>
+      <div className="item-list-actions">
         <button
           type="button"
           className="btn btn-sm btn-block"
@@ -121,6 +135,16 @@ export function ItemList({ store, items }: ItemListProps) {
         >
           ↶ 실행 취소
         </button>
+        <button
+          type="button"
+          className="btn btn-sm btn-block btn-secondary"
+          disabled={items.length === 0}
+          onClick={handleCopy}
+        >
+          {copied ? <Check size={14} /> : <Copy size={14} />}
+          {copied ? '복사됨' : '목록 복사'}
+        </button>
+        <p className="item-copy-hint">(예: 사과*1,키위*2)</p>
       </div>
     </section>
   )

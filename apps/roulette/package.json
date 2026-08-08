@@ -20,6 +20,7 @@
     "@stream/sse": "workspace:*",
     "@stream/ui": "workspace:*",
     "canvas-confetti": "^1.9.3",
+    "lucide-react": "catalog:",
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",

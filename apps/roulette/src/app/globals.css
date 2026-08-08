@@ -905,6 +905,25 @@ textarea {
   border-radius: var(--radius-md);
 }
 
+.item-list-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 0.8rem;
+}
+
+.item-list-actions .btn {
+  justify-content: center;
+}
+
+.item-copy-hint {
+  margin: 0;
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--muted-dim);
+  line-height: 1.35;
+}
+
 /* ---------- log feed (single-line, poll VoteFeed와 동일) ---------- */
 
 .log-feed {
