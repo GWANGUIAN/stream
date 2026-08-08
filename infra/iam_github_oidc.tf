@@ -24,12 +24,15 @@ data "aws_iam_policy_document" "github_assume" {
       values   = ["sts.amazonaws.com"]
     }
 
-    # Environment jobs use …:environment:NAME; push jobs use …:ref:refs/heads/….
-    # Allow any subject under this repo so both forms (and future claim tweaks) work.
+    # GitHub may emit classic `repo:ORG/REPO:…` or immutable
+    # `repo:ORG@ORG_ID/REPO@REPO_ID:…` subject claims (see CloudTrail userName).
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_repository}:*"]
+      values = [
+        "repo:${var.github_repository}:*",
+        "repo:${split("/", var.github_repository)[0]}@*/${split("/", var.github_repository)[1]}@*:*",
+      ]
     }
   }
 }
