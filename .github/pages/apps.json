@@ -1,17 +1,17 @@
 [
   {
-    "id": "roulette",
-    "name": "후원 랜덤 룰렛",
-    "description": "후원으로 아이템이 등록되는 방송용 랜덤 룰렛",
-    "path": "roulette/",
-    "image": "images/roulette.png"
-  },
-  {
     "id": "poll",
     "name": "채팅 투표",
     "description": "채팅으로 진행하는 방송용 실시간 투표",
     "path": "poll/",
     "image": "images/poll.png"
+  },
+  {
+    "id": "roulette",
+    "name": "후원 랜덤 룰렛",
+    "description": "후원으로 아이템이 등록되는 방송용 랜덤 룰렛",
+    "path": "roulette/",
+    "image": "images/roulette.png"
   },
   {
     "id": "sentence",
