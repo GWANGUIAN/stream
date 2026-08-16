@@ -1,0 +1,10 @@
+{
+  "name": "@stream/wakmenu",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": { "test": "vitest run", "typecheck": "tsc --noEmit" },
+  "dependencies": { "@stream/chat": "workspace:*" },
+  "devDependencies": { "@stream/config": "workspace:*", "@types/node": "catalog:", "typescript": "catalog:", "vitest": "catalog:" }
+}

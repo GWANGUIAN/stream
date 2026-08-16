@@ -61,6 +61,14 @@ jobs:
           NEXT_PUBLIC_CHAT_SSE_BASE: https://chat.streamcontent.click/api/chat
         run: pnpm run build:pages
 
+      # 우왁굳 전용 게임: 랜딩에는 노출하지 않고 고정 경로로만 배포합니다.
+      - name: Build wakmenu (static export)
+        working-directory: apps/wakmenu
+        env:
+          NEXT_PUBLIC_BASE_PATH: /wakmenu
+          NEXT_PUBLIC_CHAT_SSE_BASE: https://chat.streamcontent.click/api/chat
+        run: pnpm run build:pages
+
       # 랜딩(apps.json)에는 올리지 않는 내부 검증용 앱
       - name: Build chat-test (static export)
         working-directory: apps/chat-test
@@ -75,6 +83,7 @@ jobs:
           cp -r apps/roulette/out _site/roulette
           cp -r apps/poll/out _site/poll
           cp -r apps/sentence/out _site/sentence
+          cp -r apps/wakmenu/out _site/wakmenu
           cp -r apps/chat-test/out _site/chat-test
           node .github/pages/build-index.mjs _site
           # CloudFront 403/404 매핑용 최소 페이지
