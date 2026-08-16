@@ -25,8 +25,7 @@ function FoodImage({ menu }: { menu: MenuAnswer }) {
 
 function ResultCard({ result, index, startedAt, settled }: { result: MenuResult; index: number; startedAt: number | null; settled: boolean }) {
   if (!settled) return <article className="result-card roulette-card"><div className="roulette-window roulette-running"><div className="roulette-strip">라면<br/>치킨<br/>김밥<br/>초밥<br/>피자<br/>{result.menu.label}<br/>국밥<br/>떡볶이<br/>쌀국수<br/>카레<br/></div></div><p>오늘의 밥을 고르는 중…</p></article>
-  return <article className="result-card" style={{ animationDelay: `${index * 180}ms` }}>
-    <div className="roulette-window"><div className="roulette-strip">🍜 · 🍕 · 🍗 · 🍱 · {result.menu.label}</div></div>
+  return <article className="result-card result-revealed" style={{ animationDelay: `${index * 180}ms` }}>
     <FoodImage menu={result.menu} />
     <div className="result-title"><span>오늘의 밥</span><h2>{result.menu.label}</h2><strong><Users size={17} /> {result.winners.length.toLocaleString('ko-KR')}명 정답!</strong></div>
     <ol className="fastest-list">{result.fastest.length ? result.fastest.map((winner, rank) => <li key={winner.viewerId}><b>{['🥇','🥈','🥉','4위','5위'][rank]}</b><span>{winner.nickname}</span><time>{startedAt ? `+${formatTime(winner.at - startedAt)}` : ''}</time></li>) : <li className="empty">아직 정답자가 없어요</li>}</ol>
