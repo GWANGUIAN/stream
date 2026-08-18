@@ -30,7 +30,7 @@ function makeId(): string { return `${Date.now().toString(36)}-${Math.random().t
 export class WakmenuEngine {
   private phase: WakmenuPhase = 'idle'
   private answers: MenuAnswer[] = []
-  private durationSec = 60
+  private durationSec = 30
   private startedAt: number | null = null
   private endsAt: number | null = null
   private allowMultipleAnswers = false
@@ -46,7 +46,7 @@ export class WakmenuEngine {
 
   constructor(options: WakmenuOptions = {}) { this.now = options.now ?? Date.now; this.idFactory = options.idFactory ?? makeId; this.historyLimit = options.historyLimit ?? 50 }
   setAnswers(answers: MenuAnswer[]): void { if (this.phase !== 'idle') return; this.answers = answers.map((a) => ({ ...a, aliases: [...a.aliases] })); this.notify() }
-  setDurationSec(seconds: number): void { if (this.phase !== 'idle') return; this.durationSec = Math.max(5, Math.round(seconds) || 60); this.notify() }
+  setDurationSec(seconds: number): void { if (this.phase !== 'idle') return; this.durationSec = Math.max(5, Math.round(seconds) || 30); this.notify() }
   setAllowMultipleAnswers(value: boolean): void { if (this.phase !== 'idle') return; this.allowMultipleAnswers = value; this.notify() }
   start(): boolean { if (!this.answers.length) return false; this.phase = 'running'; this.startedAt = this.now(); this.endsAt = this.startedAt + this.durationSec * 1000; this.winners.clear(); this.acceptedMessages = 0; this.feed = []; this.sequence = 0; this.notify(); return true }
   close(): void { if (this.phase !== 'running') return; this.phase = 'closed'; this.endsAt = null; this.notify() }

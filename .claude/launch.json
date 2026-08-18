@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "wakmenu",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "./apps/wakmenu", "run", "dev"],
+      "port": 3004,
+      "url": "http://localhost:3004"
+    }
+  ]
+}
