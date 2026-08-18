@@ -1,6 +1,6 @@
 'use client'
 
-import { Pause, Play, SkipBack, SkipForward, X } from 'lucide-react'
+import { Pause, Play, SkipBack, SkipForward, Volume2, VolumeX, X } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import type { PlaylistTrack } from '@/lib/playlist'
 
@@ -11,10 +11,14 @@ export interface BgmPopoverProps {
   playlist: PlaylistTrack[]
   currentIndex: number | null
   isPlaying: boolean
+  volume: number
+  muted: boolean
   onSelectTrack: (index: number) => void
   onTogglePlayPause: () => void
   onNext: () => void
   onPrev: () => void
+  onVolumeChange: (value: number) => void
+  onToggleMute: () => void
 }
 
 export function BgmPopover({
@@ -24,10 +28,14 @@ export function BgmPopover({
   playlist,
   currentIndex,
   isPlaying,
+  volume,
+  muted,
   onSelectTrack,
   onTogglePlayPause,
   onNext,
   onPrev,
+  onVolumeChange,
+  onToggleMute,
 }: BgmPopoverProps) {
   const rootRef = useRef<HTMLDivElement>(null)
 
@@ -48,6 +56,7 @@ export function BgmPopover({
   }, [open, onClose])
 
   const current = currentIndex != null ? playlist[currentIndex] : null
+  const volumePercent = muted ? 0 : volume
 
   return (
     <div ref={rootRef} className={`bgm-popover ${open ? 'open' : ''}`}>
@@ -59,6 +68,21 @@ export function BgmPopover({
       </div>
       <div className="bgm-video">
         <div ref={containerRef} />
+      </div>
+      <div className="bgm-volume">
+        <button type="button" onClick={onToggleMute} aria-label={muted || volume === 0 ? '음소거 해제' : '음소거'}>
+          {muted || volume === 0 ? <VolumeX size={15} /> : <Volume2 size={15} />}
+        </button>
+        <input
+          type="range"
+          className="bgm-volume-slider"
+          min={0}
+          max={100}
+          value={volumePercent}
+          onChange={(event) => onVolumeChange(Number(event.target.value))}
+          style={{ background: `linear-gradient(to right, #b9e743 ${volumePercent}%, #f1ead7 ${volumePercent}%)` }}
+          aria-label="볼륨"
+        />
       </div>
       <div className="bgm-track-info">
         <strong>{current ? current.title : '재생목록에서 곡을 선택하세요'}</strong>

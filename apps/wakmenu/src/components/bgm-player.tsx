@@ -9,7 +9,7 @@ import { BgmPopover } from './bgm-popover'
 export function BgmPlayer() {
   const [open, setOpen] = useState(false)
   const player = useYoutubePlayer(BGM_PLAYLIST)
-  const currentTrack = player.currentIndex != null ? BGM_PLAYLIST[player.currentIndex] : null
+  const currentTrack = player.currentIndex != null ? BGM_PLAYLIST[player.currentIndex] ?? null : null
 
   const handleSelectTrack = useCallback(
     (index: number) => {
@@ -34,10 +34,14 @@ export function BgmPlayer() {
         playlist={BGM_PLAYLIST}
         currentIndex={player.currentIndex}
         isPlaying={player.isPlaying}
+        volume={player.volume}
+        muted={player.muted}
         onSelectTrack={handleSelectTrack}
         onTogglePlayPause={player.togglePlayPause}
         onNext={player.next}
         onPrev={player.prev}
+        onVolumeChange={player.setVolume}
+        onToggleMute={player.toggleMute}
       />
     </div>
   )

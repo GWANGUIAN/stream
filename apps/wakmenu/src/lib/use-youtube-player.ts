@@ -37,6 +37,8 @@ export function useYoutubePlayer(playlist: PlaylistTrack[]) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentIndex, setCurrentIndex] = useState<number | null>(null)
   const [progress, setProgress] = useState(0)
+  const [volume, setVolumeState] = useState(100)
+  const [muted, setMuted] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -53,6 +55,8 @@ export function useYoutubePlayer(playlist: PlaylistTrack[]) {
         events: {
           onReady: () => {
             setIsReady(true)
+            setVolumeState(playerRef.current.getVolume())
+            setMuted(playerRef.current.isMuted())
             const index = pendingIndexRef.current
             pendingIndexRef.current = null
             if (index != null && index !== 0) {
@@ -141,6 +145,30 @@ export function useYoutubePlayer(playlist: PlaylistTrack[]) {
     else player.playVideo()
   }, [currentIndex, isReady, selectTrack])
 
+  const setVolume = useCallback((value: number) => {
+    const player = playerRef.current
+    if (!player) return
+    const clamped = Math.max(0, Math.min(100, Math.round(value)))
+    player.setVolume(clamped)
+    setVolumeState(clamped)
+    if (clamped > 0) {
+      player.unMute()
+      setMuted(false)
+    }
+  }, [])
+
+  const toggleMute = useCallback(() => {
+    const player = playerRef.current
+    if (!player) return
+    if (player.isMuted()) {
+      player.unMute()
+      setMuted(false)
+    } else {
+      player.mute()
+      setMuted(true)
+    }
+  }, [])
+
   const next = useCallback(() => {
     selectTrack(currentIndex == null ? 0 : (currentIndex + 1) % playlist.length, true)
   }, [currentIndex, playlist.length, selectTrack])
@@ -149,5 +177,19 @@ export function useYoutubePlayer(playlist: PlaylistTrack[]) {
     selectTrack(currentIndex == null ? 0 : (currentIndex - 1 + playlist.length) % playlist.length, true)
   }, [currentIndex, playlist.length, selectTrack])
 
-  return { containerRef, isReady, isPlaying, currentIndex, progress, selectTrack, togglePlayPause, next, prev }
+  return {
+    containerRef,
+    isReady,
+    isPlaying,
+    currentIndex,
+    progress,
+    volume,
+    muted,
+    selectTrack,
+    togglePlayPause,
+    next,
+    prev,
+    setVolume,
+    toggleMute,
+  }
 }

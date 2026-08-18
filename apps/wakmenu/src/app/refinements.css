@@ -20,6 +20,13 @@
 .bgm-popover-head button{border:0;background:none;cursor:pointer;color:#293125;display:flex;padding:2px}
 .bgm-video{aspect-ratio:16/9;border:2px solid #2d362e;background:#000}
 .bgm-video>div{width:100%;height:100%}
+.bgm-volume{display:flex;align-items:center;gap:10px;margin:10px 0 2px}
+.bgm-volume button{border:2px solid #2d362e;border-radius:999px;background:#fff;width:30px;height:30px;flex-shrink:0;display:grid;place-items:center;cursor:pointer;box-shadow:2px 2px #2d362e;color:#293125}
+.bgm-volume-slider{flex:1;appearance:none;-webkit-appearance:none;height:6px;border-radius:999px;border:2px solid #2d362e;outline:none;cursor:pointer}
+.bgm-volume-slider::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#b9e743;border:2px solid #2d362e;cursor:pointer;margin-top:-1px}
+.bgm-volume-slider::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#b9e743;border:2px solid #2d362e;cursor:pointer}
+.bgm-volume-slider::-moz-range-track{height:6px;border-radius:999px;background:#f1ead7}
+.bgm-volume-slider::-moz-range-progress{height:6px;border-radius:999px;background:#b9e743}
 .bgm-track-info{margin:12px 0 8px;text-align:center}
 .bgm-track-info strong{display:block;font-weight:bold;font-size:.92rem;line-height:1.3}
 .bgm-track-info span{display:block;color:#84785f;font-size:.78rem;margin-top:2px}
