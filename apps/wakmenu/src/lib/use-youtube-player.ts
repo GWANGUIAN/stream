@@ -43,14 +43,15 @@ export function useYoutubePlayer(playlist: PlaylistTrack[]) {
   useEffect(() => {
     let cancelled = false
     loadYoutubeApi().then(() => {
-      if (cancelled || !containerRef.current || playerRef.current || !playlist.length) return
+      const firstTrack = playlist[0]
+      if (cancelled || !containerRef.current || playerRef.current || !firstTrack) return
       // Pass real pixel dimensions (not '100%') so YouTube's internal control-bar
       // layout (volume slider popup, etc.) matches the actual rendered size.
       const rect = containerRef.current.getBoundingClientRect()
       playerRef.current = new window.YT.Player(containerRef.current, {
         width: Math.round(rect.width) || 320,
         height: Math.round(rect.height) || 180,
-        videoId: playlist[0].id,
+        videoId: firstTrack.id,
         playerVars: { playsinline: 1, rel: 0 },
         events: {
           onReady: () => {
@@ -59,8 +60,9 @@ export function useYoutubePlayer(playlist: PlaylistTrack[]) {
             setMuted(playerRef.current.isMuted())
             const index = pendingIndexRef.current
             pendingIndexRef.current = null
-            if (index != null && index !== 0) {
-              playerRef.current.cueVideoById(playlist[index].id)
+            const pendingTrack = index != null ? playlist[index] : undefined
+            if (index != null && index !== 0 && pendingTrack) {
+              playerRef.current.cueVideoById(pendingTrack.id)
               setCurrentIndex(index)
             } else {
               setCurrentIndex(0)

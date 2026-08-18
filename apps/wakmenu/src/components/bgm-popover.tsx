@@ -55,7 +55,11 @@ export function BgmPopover({
     }
   }, [open, onClose])
 
-  const current = currentIndex != null ? playlist[currentIndex] : null
+  let current: PlaylistTrack | null = null
+  if (currentIndex != null) {
+    const track = playlist[currentIndex]
+    if (track) current = track
+  }
   const volumePercent = muted ? 0 : volume
 
   return (

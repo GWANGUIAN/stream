@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from 'react'
 import { BGM_PLAYLIST } from '@/lib/playlist'
+import type { PlaylistTrack } from '@/lib/playlist'
 import { useYoutubePlayer } from '@/lib/use-youtube-player'
 import { BgmBar } from './bgm-bar'
 import { BgmPopover } from './bgm-popover'
@@ -9,7 +10,11 @@ import { BgmPopover } from './bgm-popover'
 export function BgmPlayer() {
   const [open, setOpen] = useState(false)
   const player = useYoutubePlayer(BGM_PLAYLIST)
-  const currentTrack = player.currentIndex != null ? BGM_PLAYLIST[player.currentIndex] ?? null : null
+  let currentTrack: PlaylistTrack | null = null
+  if (player.currentIndex != null) {
+    const track = BGM_PLAYLIST[player.currentIndex]
+    if (track) currentTrack = track
+  }
 
   const handleSelectTrack = useCallback(
     (index: number) => {
