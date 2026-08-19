@@ -41,3 +41,19 @@
 .bgm-playlist-text small{color:#84785f;font-size:.72rem}
 .bgm-playlist li.active button{background:#e6f5b6;border-color:#8dbb25}
 @media(max-width:620px){.bgm-popover{left:-10px;width:min(320px,92vw)}.bgm-marquee{width:120px}.bgm-transport button{width:32px;height:32px}.bgm-transport-play{width:44px!important;height:44px!important}}
+
+.header-audio-row{display:flex;align-items:center;gap:2px;margin-bottom:10px}
+.header-audio-row .bgm-widget{margin-bottom:0}
+.ambient-bgm{position:relative;display:inline-flex;margin-left:10px}
+.ambient-bgm-toggle{border:0;background:transparent;padding:6px 8px;margin:0;display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:#2d362e;border-radius:999px;transition:color .15s ease,transform .15s ease}
+.ambient-bgm-toggle:hover{transform:scale(1.06)}
+.ambient-bgm-toggle[aria-pressed="false"]{color:#b4a67f}
+.ambient-bgm-label{font-weight:bold;font-size:.82rem;white-space:nowrap}
+.ambient-bgm-popover{position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%) translateY(-4px);z-index:20;background:#fff9e9;border:2px solid #2d362e;border-radius:12px;box-shadow:3px 3px #ffd65a;padding:12px 10px;display:flex;justify-content:center;visibility:hidden;opacity:0;pointer-events:none;transition:opacity .16s ease,transform .16s ease,visibility .16s}
+.ambient-bgm-popover.open{visibility:visible;opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.ambient-bgm-slider{appearance:none;-webkit-appearance:slider-vertical;writing-mode:vertical-lr;direction:rtl;width:6px;height:112px;border-radius:999px;border:2px solid #2d362e;background:#f1ead7;outline:none;cursor:pointer}
+.ambient-bgm-slider::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#b9e743;border:2px solid #2d362e;cursor:pointer}
+.ambient-bgm-slider::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#b9e743;border:2px solid #2d362e;cursor:pointer}
+.ambient-bgm-slider::-moz-range-track{width:6px;border-radius:999px;background:#f1ead7}
+.ambient-bgm-slider::-moz-range-progress{width:6px;border-radius:999px;background:#b9e743}
+@media(max-width:620px){.ambient-bgm-popover{left:auto;right:-6px;transform:translateY(-4px)}.ambient-bgm-popover.open{transform:translateY(0)}}
