@@ -12,7 +12,7 @@ export interface MenuAnswer {
 }
 
 export interface Winner { viewerId: string; nickname: string; at: number; sequence: number }
-export interface SubmissionFeedEntry { id: string; nickname: string; submittedText: string; at: number }
+export interface SubmissionFeedEntry { id: string; nickname: string; submittedText: string; correct: boolean; at: number }
 export interface MenuResult { menu: MenuAnswer; winners: Winner[]; fastest: Winner[] }
 export interface WakmenuHistory { id: string; startedAt: number; endedAt: number; results: MenuResult[] }
 export interface WakmenuSnapshot {
@@ -54,14 +54,18 @@ export class WakmenuEngine {
   reset(): void { this.phase = 'idle'; this.startedAt = null; this.endsAt = null; this.winners.clear(); this.acceptedMessages = 0; this.feed = []; this.notify() }
   clearHistory(): void { this.history = []; this.notify() }
   getRemainingMs(): number | null { if (this.phase === 'running' && this.endsAt != null && this.now() >= this.endsAt) this.close(); return this.endsAt == null ? null : Math.max(0, this.endsAt - this.now()) }
+  /** 정답 여부와 무관하게 `!밥 <텍스트>` 채팅은 모두 피드에 남긴다 — 오답도 실제로 시청자가 뭘 외쳤는지 보여야 하기 때문. */
   handleMessage(event: ChatMessageEvent): boolean {
     this.getRemainingMs(); if (this.phase !== 'running') return false
     const match = event.text.trim().match(/^!밥\s+(.+)$/i); if (!match) return false
-    const submittedText = (match[1] ?? '').trim(); const token = normalize(submittedText); const menu = this.answers.find((answer) => [answer.label, ...answer.aliases].some((name) => normalize(name) === token)); if (!menu) return false
+    const submittedText = (match[1] ?? '').trim(); if (!submittedText) return false
     const viewerId = event.user.id || event.user.nickname; const nickname = event.user.nickname.trim(); if (!viewerId || !nickname) return false
+    const token = normalize(submittedText); const menu = this.answers.find((answer) => [answer.label, ...answer.aliases].some((name) => normalize(name) === token))
+    this.feed = [...this.feed.slice(-9), { id: this.idFactory(), nickname, submittedText, correct: !!menu, at: event.at }]
+    if (!menu) { this.notify(); return false }
     if (!this.allowMultipleAnswers) for (const list of this.winners.values()) list.delete(viewerId)
     const list = this.winners.get(menu.id) ?? new Map<string, Winner>(); if (!list.has(viewerId)) { this.sequence += 1; list.set(viewerId, { viewerId, nickname, at: event.at, sequence: this.sequence }); this.winners.set(menu.id, list) }
-    this.acceptedMessages += 1; this.feed = [...this.feed.slice(-9), { id: this.idFactory(), nickname, submittedText, at: event.at }]; this.notify(); return true
+    this.acceptedMessages += 1; this.notify(); return true
   }
   /** 방송 전 리허설용 가짜 채팅 주입. 실제 이벤트와 동일한 경로(handleMessage)를 탑니다. */
   injectRehearsal(text: string, nickname: string): boolean {
