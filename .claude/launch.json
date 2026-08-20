@@ -4,8 +4,8 @@
     {
       "name": "wakmenu",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@stream/wakmenu-app", "dev", "--", "--port", "3010"],
-      "port": 3010
+      "runtimeArgs": ["--filter", "@stream/wakmenu-app", "run", "dev"],
+      "port": 3004
     }
   ]
 }

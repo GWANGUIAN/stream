@@ -98,12 +98,14 @@ function ResultCard({
     return (
       <article className="result-card roulette-card">
         <div className="roulette-window roulette-running">
-          <div className="roulette-strip">
-            {[...Array(6)]
-              .flatMap(() => [...ROULETTE_LABELS, result.menu.label])
-              .map((label, row) => (
-                <span key={`${label}-${row}`}>{label}</span>
-              ))}
+          <div className="roulette-mask">
+            <div className="roulette-strip">
+              {[...Array(6)]
+                .flatMap(() => [...ROULETTE_LABELS, result.menu.label])
+                .map((label, row) => (
+                  <span key={`${label}-${row}`}>{label}</span>
+                ))}
+            </div>
           </div>
         </div>
         <p>오늘의 밥을 고르는 중…</p>
