@@ -12,7 +12,7 @@ export interface MenuAnswer {
 }
 
 export interface Winner { viewerId: string; nickname: string; at: number; sequence: number }
-export interface SubmissionFeedEntry { id: string; nickname: string; menuLabel: string; at: number }
+export interface SubmissionFeedEntry { id: string; nickname: string; submittedText: string; at: number }
 export interface MenuResult { menu: MenuAnswer; winners: Winner[]; fastest: Winner[] }
 export interface WakmenuHistory { id: string; startedAt: number; endedAt: number; results: MenuResult[] }
 export interface WakmenuSnapshot {
@@ -57,11 +57,22 @@ export class WakmenuEngine {
   handleMessage(event: ChatMessageEvent): boolean {
     this.getRemainingMs(); if (this.phase !== 'running') return false
     const match = event.text.trim().match(/^!밥\s+(.+)$/i); if (!match) return false
-    const token = normalize(match[1] ?? ''); const menu = this.answers.find((answer) => [answer.label, ...answer.aliases].some((name) => normalize(name) === token)); if (!menu) return false
+    const submittedText = (match[1] ?? '').trim(); const token = normalize(submittedText); const menu = this.answers.find((answer) => [answer.label, ...answer.aliases].some((name) => normalize(name) === token)); if (!menu) return false
     const viewerId = event.user.id || event.user.nickname; const nickname = event.user.nickname.trim(); if (!viewerId || !nickname) return false
     if (!this.allowMultipleAnswers) for (const list of this.winners.values()) list.delete(viewerId)
     const list = this.winners.get(menu.id) ?? new Map<string, Winner>(); if (!list.has(viewerId)) { this.sequence += 1; list.set(viewerId, { viewerId, nickname, at: event.at, sequence: this.sequence }); this.winners.set(menu.id, list) }
-    this.acceptedMessages += 1; this.feed = [...this.feed.slice(-9), { id: this.idFactory(), nickname, menuLabel: menu.label, at: event.at }]; this.notify(); return true
+    this.acceptedMessages += 1; this.feed = [...this.feed.slice(-9), { id: this.idFactory(), nickname, submittedText, at: event.at }]; this.notify(); return true
+  }
+  /** 방송 전 리허설용 가짜 채팅 주입. 실제 이벤트와 동일한 경로(handleMessage)를 탑니다. */
+  injectRehearsal(text: string, nickname: string): boolean {
+    return this.handleMessage({
+      type: 'message',
+      platform: 'soop',
+      user: { platform: 'soop', id: `rehearsal-${nickname}`, nickname, role: 'viewer', badges: [] },
+      text,
+      emojis: {},
+      at: this.now(),
+    })
   }
   private results(): MenuResult[] { return this.answers.map((menu) => { const winners = [...(this.winners.get(menu.id)?.values() ?? [])].sort((a,b) => a.at - b.at || a.sequence - b.sequence); return { menu, winners, fastest: winners.slice(0, 5) } }) }
   getSnapshot(): WakmenuSnapshot { return { phase: this.phase, answers: this.answers.map((a) => ({ ...a, aliases: [...a.aliases] })), durationSec: this.durationSec, startedAt: this.startedAt, endsAt: this.endsAt, allowMultipleAnswers: this.allowMultipleAnswers, results: this.results(), history: this.history.map((entry) => ({ ...entry, results: entry.results.map((result) => ({ ...result, winners: [...result.winners], fastest: [...result.fastest] })) })), acceptedMessages: this.acceptedMessages, feed: [...this.feed] } }

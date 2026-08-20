@@ -2,7 +2,9 @@
 
 import confetti from "canvas-confetti";
 import {
+  Crown,
   History,
+  Medal,
   Play,
   Plus,
   RotateCcw,
@@ -24,6 +26,7 @@ import { chatSseUrl, subscribeChatSse } from "@stream/sse/client";
 import { colorForNickname } from "@stream/ui";
 import type { MenuAnswer, MenuResult, WakmenuPhase } from "@stream/wakmenu";
 import { AmbientBgm } from "@/components/ambient-bgm";
+import { AutoRehearsalFeed } from "@/components/auto-rehearsal-feed";
 import { BgmPlayer } from "@/components/bgm-player";
 import { FOOD_CATALOG } from "@/lib/catalog";
 import {
@@ -132,8 +135,8 @@ function ResultCard({
         <span>오늘의 밥</span>
         <h2>{result.menu.label}</h2>
         <strong className="winner-count">
-          <Users size={15} /> {result.winners.length.toLocaleString("ko-KR")}명
-          정답
+          <Users size={14} />
+          <b>{result.winners.length.toLocaleString("ko-KR")}</b>명 정답
         </strong>
       </div>
       <ol className="fastest-list">
@@ -141,13 +144,13 @@ function ResultCard({
           result.fastest.map((winner, rank) => (
             <li key={winner.viewerId} className={`rank-${rank + 1}`}>
               <span className="rank-badge">
-                {["🥇", "🥈", "🥉", "4", "5"][rank]}
-              </span>
-              <span
-                className="avatar"
-                style={{ background: colorForNickname(winner.nickname) }}
-              >
-                {winner.nickname.trim().charAt(0).toUpperCase()}
+                {rank === 0 ? (
+                  <Crown size={16} />
+                ) : rank < 3 ? (
+                  <Medal size={15} />
+                ) : (
+                  rank + 1
+                )}
               </span>
               <span className="nickname">{winner.nickname}</span>
               <time>
@@ -612,7 +615,7 @@ export default function WakmenuPage() {
                       {entry.nickname}
                     </b>
                     <span>님이 </span>
-                    <strong>{entry.menuLabel}</strong>
+                    <strong>{entry.submittedText}</strong>
                     <span>를 제출했습니다</span>
                   </p>
                 ))
@@ -622,6 +625,13 @@ export default function WakmenuPage() {
                 </p>
               )}
             </div>
+            {process.env.NODE_ENV === "development" && (
+              <AutoRehearsalFeed
+                store={store}
+                active={snapshot.phase === "running"}
+                answers={selected}
+              />
+            )}
             <div className="close-row">
               {remaining != null && (
                 <strong
@@ -650,23 +660,29 @@ export default function WakmenuPage() {
           </div>
         )}
         {snapshot.phase === "revealed" && (
-          <div className="results">
-            {results.map((result, index) => (
-              <ResultCard
-                key={result.menu.id}
-                result={result}
-                index={index}
-                startedAt={snapshot.startedAt}
-                mode={
-                  index < revealedCount
-                    ? "revealed"
-                    : index < stoppedCount
-                      ? "stopped"
-                      : "spinning"
-                }
-              />
-            ))}
-          </div>
+          <>
+            <p className="submissions-summary">
+              <Sparkles size={14} /> 총{" "}
+              <b>{snapshot.acceptedMessages.toLocaleString("ko-KR")}</b>건 제출됨
+            </p>
+            <div className="results">
+              {results.map((result, index) => (
+                <ResultCard
+                  key={result.menu.id}
+                  result={result}
+                  index={index}
+                  startedAt={snapshot.startedAt}
+                  mode={
+                    index < revealedCount
+                      ? "revealed"
+                      : index < stoppedCount
+                        ? "stopped"
+                        : "spinning"
+                  }
+                />
+              ))}
+            </div>
+          </>
         )}
       </section>
       <button
