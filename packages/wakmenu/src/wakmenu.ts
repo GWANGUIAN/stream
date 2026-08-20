@@ -61,7 +61,7 @@ export class WakmenuEngine {
     const viewerId = event.user.id || event.user.nickname; const nickname = event.user.nickname.trim(); if (!viewerId || !nickname) return false
     if (!this.allowMultipleAnswers) for (const list of this.winners.values()) list.delete(viewerId)
     const list = this.winners.get(menu.id) ?? new Map<string, Winner>(); if (!list.has(viewerId)) { this.sequence += 1; list.set(viewerId, { viewerId, nickname, at: event.at, sequence: this.sequence }); this.winners.set(menu.id, list) }
-    this.acceptedMessages += 1; this.feed = [...this.feed.slice(-3), { id: this.idFactory(), nickname, menuLabel: menu.label, at: event.at }]; this.notify(); return true
+    this.acceptedMessages += 1; this.feed = [...this.feed.slice(-9), { id: this.idFactory(), nickname, menuLabel: menu.label, at: event.at }]; this.notify(); return true
   }
   private results(): MenuResult[] { return this.answers.map((menu) => { const winners = [...(this.winners.get(menu.id)?.values() ?? [])].sort((a,b) => a.at - b.at || a.sequence - b.sequence); return { menu, winners, fastest: winners.slice(0, 5) } }) }
   getSnapshot(): WakmenuSnapshot { return { phase: this.phase, answers: this.answers.map((a) => ({ ...a, aliases: [...a.aliases] })), durationSec: this.durationSec, startedAt: this.startedAt, endsAt: this.endsAt, allowMultipleAnswers: this.allowMultipleAnswers, results: this.results(), history: this.history.map((entry) => ({ ...entry, results: entry.results.map((result) => ({ ...result, winners: [...result.winners], fastest: [...result.fastest] })) })), acceptedMessages: this.acceptedMessages, feed: [...this.feed] } }

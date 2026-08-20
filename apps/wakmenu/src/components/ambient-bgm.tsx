@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH || '/wakmenu'
 const MUTED_KEY = 'wakmenu-ambient-muted'
 const VOLUME_KEY = 'wakmenu-ambient-volume'
-const DEFAULT_VOLUME = 45
+const DEFAULT_VOLUME = 100
 const HIDE_DELAY_MS = 500
 
 function loadMuted() {
@@ -40,13 +40,18 @@ export function AmbientBgm() {
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
-    const tryPlay = () => void audio.play().catch(() => undefined)
+    const events = ['pointerdown', 'keydown', 'touchstart'] as const
+    const tryPlay = () => {
+      if (audio.paused) void audio.play().catch(() => undefined)
+    }
+    const cleanup = () => events.forEach((type) => window.removeEventListener(type, tryPlay))
+    const onPlaying = () => cleanup()
     tryPlay()
-    window.addEventListener('pointerdown', tryPlay, { once: true })
-    window.addEventListener('keydown', tryPlay, { once: true })
+    events.forEach((type) => window.addEventListener(type, tryPlay))
+    audio.addEventListener('playing', onPlaying)
     return () => {
-      window.removeEventListener('pointerdown', tryPlay)
-      window.removeEventListener('keydown', tryPlay)
+      cleanup()
+      audio.removeEventListener('playing', onPlaying)
     }
   }, [])
 
