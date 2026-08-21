@@ -244,8 +244,16 @@ export default function WakmenuPage() {
         if (event.type === "message") {
           store.engine.handleMessage(event);
           setStatus("SOOP 연동됨");
-        } else if (event.type === "status" && event.status === "error")
-          setStatus("SOOP 연동 실패");
+        } else if (event.type === "status") {
+          if (event.status === "connected") setStatus("SOOP 연동됨");
+          else if (
+            event.status === "connecting" ||
+            event.status === "reconnecting"
+          )
+            setStatus("SOOP 연결 중");
+          else if (event.status === "disconnected" || event.status === "error")
+            setStatus("SOOP 연동 실패");
+        }
       },
       onError: () => setStatus("SOOP 연동 실패"),
     });
