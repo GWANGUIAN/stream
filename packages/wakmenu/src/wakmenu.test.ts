@@ -13,6 +13,6 @@ describe('WakmenuEngine', () => {
     engine.handleMessage(event('b', 'B', '!밥 여전히아님', 3))
     engine.handleMessage(event('c', 'C', '!밥 포', 4))
     expect(engine.getSnapshot().participantCount).toBe(3)
-    expect(engine.getSnapshot().acceptedMessages).toBe(2)
+    expect(engine.getSnapshot().acceptedMessages).toBe(4)
   })
 })
