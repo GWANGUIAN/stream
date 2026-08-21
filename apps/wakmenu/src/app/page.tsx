@@ -671,7 +671,7 @@ export default function WakmenuPage() {
           <>
             <p className="submissions-summary">
               <Sparkles size={14} /> 총{" "}
-              <b>{snapshot.acceptedMessages.toLocaleString("ko-KR")}</b>건 제출됨
+              <b>{snapshot.participantCount.toLocaleString("ko-KR")}</b>명 제출
             </p>
             <div className="results">
               {results.map((result, index) => (

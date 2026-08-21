@@ -6,4 +6,13 @@ const event = (id: string, nickname: string, text: string, at: number) => ({ typ
 describe('WakmenuEngine', () => {
   it('normalizes aliases and keeps the latest answer by default', () => { const engine = new WakmenuEngine({ now: () => 0 }); engine.setAnswers([menu]); engine.start(); expect(engine.handleMessage(event('a','A','!밥  포 ',1))).toBe(true); engine.handleMessage(event('a','A','!밥 아닌메뉴',2)); expect(engine.getSnapshot().results[0]?.winners).toHaveLength(1); engine.handleMessage(event('a','A','!밥 쌀국수',3)); expect(engine.getSnapshot().results[0]?.fastest[0]?.at).toBe(3) })
   it('keeps earlier correct submissions and ranks first five stably when enabled', () => { const engine = new WakmenuEngine({ now: () => 0 }); engine.setAnswers([menu]); engine.setAllowMultipleAnswers(true); engine.start(); for (let i=0;i<6;i++) engine.handleMessage(event(String(i), `u${i}`, '!밥 쌀국수', 10)); const result=engine.getSnapshot().results[0]; expect(result?.winners).toHaveLength(6); expect(result?.fastest.map((winner) => winner.nickname)).toEqual(['u0','u1','u2','u3','u4']) })
+  it('counts every distinct viewer who submitted, right or wrong', () => {
+    const engine = new WakmenuEngine({ now: () => 0 }); engine.setAnswers([menu]); engine.start()
+    engine.handleMessage(event('a', 'A', '!밥 쌀국수', 1))
+    engine.handleMessage(event('b', 'B', '!밥 아닌메뉴', 2))
+    engine.handleMessage(event('b', 'B', '!밥 여전히아님', 3))
+    engine.handleMessage(event('c', 'C', '!밥 포', 4))
+    expect(engine.getSnapshot().participantCount).toBe(3)
+    expect(engine.getSnapshot().acceptedMessages).toBe(2)
+  })
 })
