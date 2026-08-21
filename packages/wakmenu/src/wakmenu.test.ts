@@ -15,4 +15,29 @@ describe('WakmenuEngine', () => {
     expect(engine.getSnapshot().participantCount).toBe(3)
     expect(engine.getSnapshot().acceptedMessages).toBe(4)
   })
+  it('counts a viewer who wins multiple menus only once toward correctParticipantCount', () => {
+    const menu2 = { id: 'ramen', label: '라면', aliases: [], imageUrl: '' }
+    const engine = new WakmenuEngine({ now: () => 0 }); engine.setAnswers([menu, menu2]); engine.setAllowMultipleAnswers(true); engine.start()
+    engine.handleMessage(event('a', 'A', '!밥 쌀국수', 1))
+    engine.handleMessage(event('a', 'A', '!밥 라면', 2))
+    engine.handleMessage(event('b', 'B', '!밥 오답', 3))
+    expect(engine.getSnapshot().correctParticipantCount).toBe(1)
+    expect(engine.getSnapshot().participantCount).toBe(2)
+  })
+  it('merges normalized-equivalent wrong answers and ranks them by frequency', () => {
+    const engine = new WakmenuEngine({ now: () => 0 }); engine.setAnswers([menu]); engine.start()
+    engine.handleMessage(event('a', 'A', '!밥 라면', 1))
+    engine.handleMessage(event('b', 'B', '!밥 라 면', 2))
+    engine.handleMessage(event('c', 'C', '!밥 김밥', 3))
+    const top = engine.getSnapshot().topWrongAnswers
+    expect(top[0]).toEqual({ text: '라면', count: 2 })
+    expect(top[1]).toEqual({ text: '김밥', count: 1 })
+  })
+  it('resets wrong-answer tracking on start()', () => {
+    const engine = new WakmenuEngine({ now: () => 0 }); engine.setAnswers([menu]); engine.start()
+    engine.handleMessage(event('a', 'A', '!밥 오답', 1))
+    expect(engine.getSnapshot().topWrongAnswers).toHaveLength(1)
+    engine.start()
+    expect(engine.getSnapshot().topWrongAnswers).toHaveLength(0)
+  })
 })

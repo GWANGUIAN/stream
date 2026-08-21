@@ -3,6 +3,7 @@
 import confetti from "canvas-confetti";
 import {
   Crown,
+  Flame,
   History,
   Medal,
   Play,
@@ -210,6 +211,11 @@ export default function WakmenuPage() {
   }, [snapshot?.durationSec]);
   const selected = snapshot?.answers ?? [];
   const results = snapshot?.results ?? [];
+  const showWrongAnswerPanel =
+    snapshot?.phase === "revealed" &&
+    results.length > 0 &&
+    revealedCount === results.length &&
+    (snapshot?.topWrongAnswers.length ?? 0) > 0;
   const suggestions = useMemo(() => {
     const term = query.trim().toLowerCase().replace(/\s/g, "");
     if (!term) return [];
@@ -671,7 +677,22 @@ export default function WakmenuPage() {
           <>
             <p className="submissions-summary">
               <Sparkles size={14} /> 총{" "}
-              <b>{snapshot.participantCount.toLocaleString("ko-KR")}</b>명 제출
+              <b>{snapshot.participantCount.toLocaleString("ko-KR")}</b>명 중{" "}
+              <b>
+                {snapshot.correctParticipantCount.toLocaleString("ko-KR")}
+              </b>
+              명 정답
+              {snapshot.participantCount > 0 && (
+                <span className="accuracy-pct">
+                  (
+                  {Math.round(
+                    (snapshot.correctParticipantCount /
+                      snapshot.participantCount) *
+                      100,
+                  )}
+                  %)
+                </span>
+              )}
             </p>
             <div className="results">
               {results.map((result, index) => (
@@ -700,37 +721,61 @@ export default function WakmenuPage() {
       >
         <History size={16} /> 히스토리 ({snapshot.history.length})
       </button>
-      {historyOpen && (
-        <aside className="history">
-          <button type="button" onClick={() => setHistoryOpen(false)}>
-            닫기 ×
-          </button>
-          <h2>지난 밥 맞추기</h2>
-          {[...snapshot.history].reverse().map((entry) => (
-            <article key={entry.id}>
-              <time>{new Date(entry.endedAt).toLocaleString("ko-KR")}</time>
-              {entry.results.map((result) => (
-                <div key={result.menu.id}>
-                  <b>{result.menu.label}</b> · {result.winners.length}명{" "}
-                  <small>
-                    TOP 5:{" "}
-                    {result.fastest
-                      .map((winner) => winner.nickname)
-                      .join(", ") || "없음"}
-                  </small>
-                </div>
+      {(showWrongAnswerPanel || historyOpen) && (
+        <div className="floating-stack">
+          {showWrongAnswerPanel && (
+            <aside className="wrong-answer-panel" aria-live="polite">
+              <h2>
+                <Flame size={16} /> 인기 오답
+              </h2>
+              <ol>
+                {snapshot.topWrongAnswers.slice(0, 3).map((entry, rank) => (
+                  <li key={entry.text} className={`rank-${rank + 1}`}>
+                    <span className="rank-badge">{rank + 1}</span>
+                    <span className="wrong-text">{entry.text}</span>
+                    <b className="wrong-count">
+                      {entry.count.toLocaleString("ko-KR")}
+                    </b>
+                  </li>
+                ))}
+              </ol>
+            </aside>
+          )}
+          {historyOpen && (
+            <aside className="history">
+              <button type="button" onClick={() => setHistoryOpen(false)}>
+                닫기 ×
+              </button>
+              <h2>지난 밥 맞추기</h2>
+              {[...snapshot.history].reverse().map((entry) => (
+                <article key={entry.id}>
+                  <time>
+                    {new Date(entry.endedAt).toLocaleString("ko-KR")}
+                  </time>
+                  {entry.results.map((result) => (
+                    <div key={result.menu.id}>
+                      <b>{result.menu.label}</b> · {result.winners.length}명{" "}
+                      <small>
+                        TOP 5:{" "}
+                        {result.fastest
+                          .map((winner) => winner.nickname)
+                          .join(", ") || "없음"}
+                      </small>
+                    </div>
+                  ))}
+                </article>
               ))}
-            </article>
-          ))}
-          {!snapshot.history.length && <p>아직 공개된 게임이 없어요.</p>}
-          <button
-            className="clear"
-            type="button"
-            onClick={() => store.engine.clearHistory()}
-          >
-            히스토리 비우기
-          </button>
-        </aside>
+              {!snapshot.history.length && <p>아직 공개된 게임이 없어요.</p>}
+              <button
+                className="clear"
+                type="button"
+                onClick={() => store.engine.clearHistory()}
+              >
+                히스토리 비우기
+              </button>
+            </aside>
+          )}
+        </div>
       )}
     </main>
   );
