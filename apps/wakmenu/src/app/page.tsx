@@ -29,7 +29,9 @@ import type { MenuAnswer, MenuResult, WakmenuPhase } from "@stream/wakmenu";
 import { AmbientBgm } from "@/components/ambient-bgm";
 import { AutoRehearsalFeed } from "@/components/auto-rehearsal-feed";
 import { BgmPlayer } from "@/components/bgm-player";
+import { DonationSubmissionBanner } from "@/components/donation-submission-banner";
 import { FOOD_CATALOG } from "@/lib/catalog";
+import { eulOrReul } from "@/lib/korean";
 import {
   playCountdownUrgent,
   playCountdownWarn,
@@ -211,11 +213,12 @@ export default function WakmenuPage() {
   }, [snapshot?.durationSec]);
   const selected = snapshot?.answers ?? [];
   const results = snapshot?.results ?? [];
-  const showWrongAnswerPanel =
+  const allRevealed =
     snapshot?.phase === "revealed" &&
     results.length > 0 &&
-    revealedCount === results.length &&
-    (snapshot?.topWrongAnswers.length ?? 0) > 0;
+    revealedCount === results.length;
+  const showWrongAnswerPanel =
+    allRevealed && (snapshot?.topWrongAnswers.length ?? 0) > 0;
   const suggestions = useMemo(() => {
     const term = query.trim().toLowerCase().replace(/\s/g, "");
     if (!term) return [];
@@ -242,7 +245,7 @@ export default function WakmenuPage() {
     setStatus("SOOP 연결 중");
     const sub = subscribeChatSse({
       url: chatSseUrl(SSE, "soop", "ecvhao", {
-        types: ["message", "status"],
+        types: ["message", "status", "donation"],
         prefixes: ["!밥"],
       }),
       onOpen: () => setStatus("SOOP 연동됨"),
@@ -250,6 +253,8 @@ export default function WakmenuPage() {
         if (event.type === "message") {
           store.engine.handleMessage(event);
           setStatus("SOOP 연동됨");
+        } else if (event.type === "donation") {
+          store.engine.handleDonation(event);
         } else if (event.type === "status") {
           if (event.status === "connected") setStatus("SOOP 연동됨");
           else if (
@@ -413,7 +418,7 @@ export default function WakmenuPage() {
             우왁굳의 <em>밥</em>을 맞춰라!
           </h1>
           <p className="subtitle">
-            시청자는 <code>!밥 메뉴명</code>으로 정답을 외쳐주세요.
+            팬치분들는 <code>!밥 메뉴명</code>으로 정답을 외쳐주세요.
           </p>
         </div>
         <div className="wakdu-frame">
@@ -630,7 +635,7 @@ export default function WakmenuPage() {
                     </b>
                     <span>님이 </span>
                     <strong>{entry.submittedText}</strong>
-                    <span>를 제출했습니다</span>
+                    <span>{eulOrReul(entry.submittedText)} 제출했습니다</span>
                   </p>
                 ))
               ) : (
@@ -639,6 +644,10 @@ export default function WakmenuPage() {
                 </p>
               )}
             </div>
+            <DonationSubmissionBanner
+              entries={snapshot.donationSubmissions}
+              phase={snapshot.phase}
+            />
             {process.env.NODE_ENV === "development" && (
               <AutoRehearsalFeed
                 store={store}
@@ -675,25 +684,27 @@ export default function WakmenuPage() {
         )}
         {snapshot.phase === "revealed" && (
           <>
-            <p className="submissions-summary">
-              <Sparkles size={14} /> 총{" "}
-              <b>{snapshot.participantCount.toLocaleString("ko-KR")}</b>명 중{" "}
-              <b>
-                {snapshot.correctParticipantCount.toLocaleString("ko-KR")}
-              </b>
-              명 정답
-              {snapshot.participantCount > 0 && (
-                <span className="accuracy-pct">
-                  (
-                  {Math.round(
-                    (snapshot.correctParticipantCount /
-                      snapshot.participantCount) *
-                      100,
-                  )}
-                  %)
-                </span>
-              )}
-            </p>
+            {allRevealed && (
+              <p className="submissions-summary">
+                <Sparkles size={14} /> 총{" "}
+                <b>{snapshot.participantCount.toLocaleString("ko-KR")}</b>명 중{" "}
+                <b>
+                  {snapshot.correctParticipantCount.toLocaleString("ko-KR")}
+                </b>
+                명 정답
+                {snapshot.participantCount > 0 && (
+                  <span className="accuracy-pct">
+                    (
+                    {Math.round(
+                      (snapshot.correctParticipantCount /
+                        snapshot.participantCount) *
+                        100,
+                    )}
+                    %)
+                  </span>
+                )}
+              </p>
+            )}
             <div className="results">
               {results.map((result, index) => (
                 <ResultCard

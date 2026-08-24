@@ -54,6 +54,8 @@ function randomSubmission(answers: MenuAnswer[]): string {
   return randomItem(WRONG_ANSWERS);
 }
 
+const DONATION_AMOUNTS = [50, 100, 150, 300, 500];
+
 export function AutoRehearsalFeed({
   store,
   active,
@@ -88,10 +90,20 @@ export function AutoRehearsalFeed({
 
   if (!active) return null;
 
+  const sendTestDonation = () => {
+    const text = randomSubmission(answersRef.current);
+    const nickname = randomNickname();
+    store.engine.injectRehearsal(`!밥 ${text}`, nickname);
+    store.engine.injectRehearsalDonation(nickname, randomItem(DONATION_AMOUNTS));
+  };
+
   return (
     <div className="rehearsal-feed">
       <button type="button" onClick={() => setRunning((value) => !value)}>
         {running ? "모의 채팅 정지" : "모의 채팅 자동 주입 시작"}
+      </button>
+      <button type="button" onClick={sendTestDonation}>
+        테스트 후원 보내기
       </button>
       <small>개발용 · 인기 방송 채팅 속도로 정답/오답을 섞어 전송합니다</small>
     </div>

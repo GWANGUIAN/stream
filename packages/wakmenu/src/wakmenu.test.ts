@@ -3,6 +3,7 @@ import { WakmenuEngine } from './wakmenu'
 
 const menu = { id: 'pho', label: '쌀국수', aliases: ['포'], imageUrl: '' }
 const event = (id: string, nickname: string, text: string, at: number) => ({ type: 'message' as const, platform: 'soop' as const, user: { platform: 'soop' as const, id, nickname, role: 'viewer' as const, badges: [] }, text, emojis: {}, at })
+const donation = (id: string, nickname: string, amount: number, at: number) => ({ type: 'donation' as const, platform: 'soop' as const, user: { platform: 'soop' as const, id, nickname, role: 'viewer' as const, badges: [] }, amount, currency: 'balloon', at })
 describe('WakmenuEngine', () => {
   it('normalizes aliases and keeps the latest answer by default', () => { const engine = new WakmenuEngine({ now: () => 0 }); engine.setAnswers([menu]); engine.start(); expect(engine.handleMessage(event('a','A','!밥  포 ',1))).toBe(true); engine.handleMessage(event('a','A','!밥 아닌메뉴',2)); expect(engine.getSnapshot().results[0]?.winners).toHaveLength(1); engine.handleMessage(event('a','A','!밥 쌀국수',3)); expect(engine.getSnapshot().results[0]?.fastest[0]?.at).toBe(3) })
   it('keeps earlier correct submissions and ranks first five stably when enabled', () => { const engine = new WakmenuEngine({ now: () => 0 }); engine.setAnswers([menu]); engine.setAllowMultipleAnswers(true); engine.start(); for (let i=0;i<6;i++) engine.handleMessage(event(String(i), `u${i}`, '!밥 쌀국수', 10)); const result=engine.getSnapshot().results[0]; expect(result?.winners).toHaveLength(6); expect(result?.fastest.map((winner) => winner.nickname)).toEqual(['u0','u1','u2','u3','u4']) })
@@ -39,5 +40,52 @@ describe('WakmenuEngine', () => {
     expect(engine.getSnapshot().topWrongAnswers).toHaveLength(1)
     engine.start()
     expect(engine.getSnapshot().topWrongAnswers).toHaveLength(0)
+  })
+  it('matches a 50+ balloon donation to the same viewer\'s recent !밥 chat', () => {
+    const engine = new WakmenuEngine({ now: () => 0 }); engine.setAnswers([menu]); engine.start()
+    engine.handleMessage(event('a', 'A', '!밥 쌀국수', 1000))
+    expect(engine.handleDonation(donation('a', 'A', 50, 4000))).toBe(true)
+    const entries = engine.getSnapshot().donationSubmissions
+    expect(entries).toHaveLength(1)
+    expect(entries[0]).toMatchObject({ nickname: 'A', amount: 50, submittedText: '쌀국수', correct: true, imageUrl: '' })
+  })
+  it('ignores donations under 50 balloons', () => {
+    const engine = new WakmenuEngine({ now: () => 0 }); engine.setAnswers([menu]); engine.start()
+    engine.handleMessage(event('a', 'A', '!밥 쌀국수', 1000))
+    expect(engine.handleDonation(donation('a', 'A', 49, 1500))).toBe(false)
+    expect(engine.getSnapshot().donationSubmissions).toHaveLength(0)
+  })
+  it('ignores a donation with no matching !밥 chat from that viewer', () => {
+    const engine = new WakmenuEngine({ now: () => 0 }); engine.setAnswers([menu]); engine.start()
+    expect(engine.handleDonation(donation('a', 'A', 100, 1000))).toBe(false)
+    expect(engine.getSnapshot().donationSubmissions).toHaveLength(0)
+  })
+  it('retroactively matches when the donation arrives before the !밥 chat', () => {
+    const engine = new WakmenuEngine({ now: () => 0 }); engine.setAnswers([menu]); engine.start()
+    expect(engine.handleDonation(donation('a', 'A', 100, 1000))).toBe(false)
+    expect(engine.getSnapshot().donationSubmissions).toHaveLength(0)
+    engine.handleMessage(event('a', 'A', '!밥 쌀국수', 3000))
+    const entries = engine.getSnapshot().donationSubmissions
+    expect(entries).toHaveLength(1)
+    expect(entries[0]).toMatchObject({ nickname: 'A', amount: 100, submittedText: '쌀국수', correct: true })
+  })
+  it('ignores donations outside the 10s match window', () => {
+    const engine = new WakmenuEngine({ now: () => 0 }); engine.setAnswers([menu]); engine.start()
+    engine.handleMessage(event('a', 'A', '!밥 쌀국수', 0))
+    expect(engine.handleDonation(donation('a', 'A', 100, 10_001))).toBe(false)
+  })
+  it('resets donationSubmissions on start()', () => {
+    const engine = new WakmenuEngine({ now: () => 0 }); engine.setAnswers([menu]); engine.start()
+    engine.handleMessage(event('a', 'A', '!밥 쌀국수', 0))
+    engine.handleDonation(donation('a', 'A', 100, 0))
+    expect(engine.getSnapshot().donationSubmissions).toHaveLength(1)
+    engine.start()
+    expect(engine.getSnapshot().donationSubmissions).toHaveLength(0)
+  })
+  it('leaves imageUrl unset when the donated submission is wrong', () => {
+    const engine = new WakmenuEngine({ now: () => 0 }); engine.setAnswers([menu]); engine.start()
+    engine.handleMessage(event('a', 'A', '!밥 오답메뉴', 0))
+    engine.handleDonation(donation('a', 'A', 100, 0))
+    expect(engine.getSnapshot().donationSubmissions[0]).toMatchObject({ correct: false, imageUrl: undefined })
   })
 })

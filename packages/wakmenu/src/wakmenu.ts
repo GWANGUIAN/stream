@@ -1,6 +1,9 @@
-import type { ChatMessageEvent } from '@stream/chat'
+import type { ChatDonationEvent, ChatMessageEvent } from '@stream/chat'
 
 export type WakmenuPhase = 'idle' | 'running' | 'closed' | 'revealed'
+
+const DONATION_MIN_BALLOONS = 50
+const DONATION_MATCH_WINDOW_MS = 10_000
 
 export interface MenuAnswer {
   id: string
@@ -13,13 +16,14 @@ export interface MenuAnswer {
 
 export interface Winner { viewerId: string; nickname: string; at: number; sequence: number }
 export interface SubmissionFeedEntry { id: string; nickname: string; submittedText: string; correct: boolean; at: number }
+export interface DonationSubmissionEntry { id: string; nickname: string; amount: number; submittedText: string; correct: boolean; imageUrl?: string; at: number }
 export interface MenuResult { menu: MenuAnswer; winners: Winner[]; fastest: Winner[] }
 export interface WakmenuHistory { id: string; startedAt: number; endedAt: number; results: MenuResult[] }
 export interface WrongAnswerEntry { text: string; count: number }
 export interface WakmenuSnapshot {
   phase: WakmenuPhase; answers: MenuAnswer[]; durationSec: number; startedAt: number | null; endsAt: number | null
   allowMultipleAnswers: boolean; results: MenuResult[]; history: WakmenuHistory[]; acceptedMessages: number; feed: SubmissionFeedEntry[]
-  participantCount: number; correctParticipantCount: number; topWrongAnswers: WrongAnswerEntry[]
+  participantCount: number; correctParticipantCount: number; topWrongAnswers: WrongAnswerEntry[]; donationSubmissions: DonationSubmissionEntry[]
 }
 
 export interface WakmenuOptions { now?: () => number; idFactory?: () => string; historyLimit?: number }
@@ -42,6 +46,9 @@ export class WakmenuEngine {
   private feed: SubmissionFeedEntry[] = []
   private participants = new Set<string>()
   private wrongAnswers = new Map<string, WrongAnswerEntry>()
+  private recentSubmissions = new Map<string, { submittedText: string; correct: boolean; imageUrl?: string; at: number }>()
+  private pendingDonations = new Map<string, { nickname: string; amount: number; at: number }>()
+  private donationSubmissions: DonationSubmissionEntry[] = []
   private sequence = 0
   private readonly listeners = new Set<WakmenuListener>()
   private readonly now: () => number
@@ -52,10 +59,10 @@ export class WakmenuEngine {
   setAnswers(answers: MenuAnswer[]): void { if (this.phase !== 'idle') return; this.answers = answers.map((a) => ({ ...a, aliases: [...a.aliases] })); this.notify() }
   setDurationSec(seconds: number): void { if (this.phase !== 'idle') return; this.durationSec = Math.max(5, Math.round(seconds) || 30); this.notify() }
   setAllowMultipleAnswers(value: boolean): void { if (this.phase !== 'idle') return; this.allowMultipleAnswers = value; this.notify() }
-  start(): boolean { if (!this.answers.length) return false; this.phase = 'running'; this.startedAt = this.now(); this.endsAt = this.startedAt + this.durationSec * 1000; this.winners.clear(); this.acceptedMessages = 0; this.feed = []; this.participants.clear(); this.wrongAnswers.clear(); this.sequence = 0; this.notify(); return true }
+  start(): boolean { if (!this.answers.length) return false; this.phase = 'running'; this.startedAt = this.now(); this.endsAt = this.startedAt + this.durationSec * 1000; this.winners.clear(); this.acceptedMessages = 0; this.feed = []; this.participants.clear(); this.wrongAnswers.clear(); this.recentSubmissions.clear(); this.pendingDonations.clear(); this.donationSubmissions = []; this.sequence = 0; this.notify(); return true }
   close(): void { if (this.phase !== 'running') return; this.phase = 'closed'; this.endsAt = null; this.notify() }
   reveal(): void { if (this.phase === 'running') this.close(); if (this.phase !== 'closed') return; this.phase = 'revealed'; const results = this.results(); this.history = [...this.history.slice(-(this.historyLimit - 1)), { id: this.idFactory(), startedAt: this.startedAt ?? this.now(), endedAt: this.now(), results }]; this.notify() }
-  reset(): void { this.phase = 'idle'; this.startedAt = null; this.endsAt = null; this.winners.clear(); this.acceptedMessages = 0; this.feed = []; this.participants.clear(); this.wrongAnswers.clear(); this.notify() }
+  reset(): void { this.phase = 'idle'; this.startedAt = null; this.endsAt = null; this.winners.clear(); this.acceptedMessages = 0; this.feed = []; this.participants.clear(); this.wrongAnswers.clear(); this.recentSubmissions.clear(); this.pendingDonations.clear(); this.donationSubmissions = []; this.notify() }
   clearHistory(): void { this.history = []; this.notify() }
   getRemainingMs(): number | null { if (this.phase === 'running' && this.endsAt != null && this.now() >= this.endsAt) this.close(); return this.endsAt == null ? null : Math.max(0, this.endsAt - this.now()) }
   /** 정답 여부와 무관하게 `!밥 <텍스트>` 채팅은 모두 피드에 남긴다 — 오답도 실제로 시청자가 뭘 외쳤는지 보여야 하기 때문. */
@@ -67,6 +74,12 @@ export class WakmenuEngine {
     this.participants.add(viewerId)
     const token = normalize(submittedText); const menu = this.answers.find((answer) => [answer.label, ...answer.aliases].some((name) => normalize(name) === token))
     this.feed = [...this.feed.slice(-9), { id: this.idFactory(), nickname, submittedText, correct: !!menu, at: event.at }]
+    this.recentSubmissions.set(viewerId, { submittedText, correct: !!menu, imageUrl: menu?.imageUrl, at: event.at })
+    const pendingDonation = this.pendingDonations.get(viewerId)
+    if (pendingDonation && Math.abs(event.at - pendingDonation.at) <= DONATION_MATCH_WINDOW_MS) {
+      this.pushDonationSubmission(pendingDonation.nickname, pendingDonation.amount, submittedText, !!menu, menu?.imageUrl, event.at)
+      this.pendingDonations.delete(viewerId)
+    }
     this.acceptedMessages += 1
     if (!menu) { const existing = this.wrongAnswers.get(token); this.wrongAnswers.set(token, { text: existing?.text ?? submittedText, count: (existing?.count ?? 0) + 1 }); this.notify(); return false }
     if (!this.allowMultipleAnswers) for (const list of this.winners.values()) list.delete(viewerId)
@@ -84,10 +97,43 @@ export class WakmenuEngine {
       at: this.now(),
     })
   }
+  /**
+   * 별풍선 후원 처리. 후원 패킷 자체에는 메뉴 텍스트가 없으므로, 같은 유저가 전후
+   * `DONATION_MATCH_WINDOW_MS` 이내에 보낸 `!밥` 채팅과 시간 근접 매칭으로 연결한다.
+   * 채팅이 아직 안 왔으면 pendingDonations에 보류해 뒀다가 handleMessage에서 역매칭한다.
+   * 정답/오답 집계는 이미 handleMessage에서 끝났으므로 여기서는 보여주기용 큐만 채운다.
+   */
+  handleDonation(event: ChatDonationEvent): boolean {
+    this.getRemainingMs(); if (this.phase !== 'running') return false
+    if (event.currency !== 'balloon' || event.amount < DONATION_MIN_BALLOONS) return false
+    const viewerId = event.user.id || event.user.nickname; const nickname = event.user.nickname.trim(); if (!viewerId || !nickname) return false
+    const recent = this.recentSubmissions.get(viewerId)
+    if (recent && Math.abs(event.at - recent.at) <= DONATION_MATCH_WINDOW_MS) {
+      this.pushDonationSubmission(nickname, event.amount, recent.submittedText, recent.correct, recent.imageUrl, event.at)
+      return true
+    }
+    this.pendingDonations.set(viewerId, { nickname, amount: event.amount, at: event.at })
+    return false
+  }
+  private pushDonationSubmission(nickname: string, amount: number, submittedText: string, correct: boolean, imageUrl: string | undefined, at: number): void {
+    this.donationSubmissions = [...this.donationSubmissions.slice(-29), { id: this.idFactory(), nickname, amount, submittedText, correct, imageUrl, at }]
+    this.notify()
+  }
+  /** 방송 전 리허설용 가짜 후원 주입. 실제 이벤트와 동일한 경로(handleDonation)를 탑니다. */
+  injectRehearsalDonation(nickname: string, amount: number): boolean {
+    return this.handleDonation({
+      type: 'donation',
+      platform: 'soop',
+      user: { platform: 'soop', id: `rehearsal-${nickname}`, nickname, role: 'viewer', badges: [] },
+      amount,
+      currency: 'balloon',
+      at: this.now(),
+    })
+  }
   private results(): MenuResult[] { return this.answers.map((menu) => { const winners = [...(this.winners.get(menu.id)?.values() ?? [])].sort((a,b) => a.at - b.at || a.sequence - b.sequence); return { menu, winners, fastest: winners.slice(0, 5) } }) }
   private correctParticipantCount(): number { const ids = new Set<string>(); for (const list of this.winners.values()) for (const id of list.keys()) ids.add(id); return ids.size }
   private topWrongAnswers(): WrongAnswerEntry[] { return [...this.wrongAnswers.values()].sort((a, b) => b.count - a.count).slice(0, 5) }
-  getSnapshot(): WakmenuSnapshot { return { phase: this.phase, answers: this.answers.map((a) => ({ ...a, aliases: [...a.aliases] })), durationSec: this.durationSec, startedAt: this.startedAt, endsAt: this.endsAt, allowMultipleAnswers: this.allowMultipleAnswers, results: this.results(), history: this.history.map((entry) => ({ ...entry, results: entry.results.map((result) => ({ ...result, winners: [...result.winners], fastest: [...result.fastest] })) })), acceptedMessages: this.acceptedMessages, feed: [...this.feed], participantCount: this.participants.size, correctParticipantCount: this.correctParticipantCount(), topWrongAnswers: this.topWrongAnswers() } }
+  getSnapshot(): WakmenuSnapshot { return { phase: this.phase, answers: this.answers.map((a) => ({ ...a, aliases: [...a.aliases] })), durationSec: this.durationSec, startedAt: this.startedAt, endsAt: this.endsAt, allowMultipleAnswers: this.allowMultipleAnswers, results: this.results(), history: this.history.map((entry) => ({ ...entry, results: entry.results.map((result) => ({ ...result, winners: [...result.winners], fastest: [...result.fastest] })) })), acceptedMessages: this.acceptedMessages, feed: [...this.feed], participantCount: this.participants.size, correctParticipantCount: this.correctParticipantCount(), topWrongAnswers: this.topWrongAnswers(), donationSubmissions: [...this.donationSubmissions] } }
   loadSnapshot(snapshot: Partial<WakmenuSnapshot>): void { if (snapshot.answers) this.answers = snapshot.answers; if (snapshot.durationSec) this.durationSec = snapshot.durationSec; if (snapshot.allowMultipleAnswers != null) this.allowMultipleAnswers = snapshot.allowMultipleAnswers; if (snapshot.history) this.history = snapshot.history; this.notify() }
   onChange(listener: WakmenuListener): () => void { this.listeners.add(listener); listener(this.getSnapshot()); return () => this.listeners.delete(listener) }
   private notify(): void { const snapshot = this.getSnapshot(); for (const listener of this.listeners) listener(snapshot) }
