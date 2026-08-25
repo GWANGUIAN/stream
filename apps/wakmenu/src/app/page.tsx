@@ -676,7 +676,7 @@ export default function WakmenuPage() {
         {snapshot.phase === "closed" && (
           <div className="live-stage">
             <img className="small-wakdu" src={`${BASE}/wakdu.gif`} alt="" />
-            <h2>쩝쩝… 정답을 공개할까요?</h2>
+            <h2>으음...으으음..으음(쩝쩝)</h2>
             <button className="primary" type="button" onClick={reveal}>
               <Sparkles size={17} /> 정답 공개
             </button>
