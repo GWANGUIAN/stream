@@ -212,6 +212,16 @@ export default function WakmenuPage() {
     if (snapshot) setDurationText(String(snapshot.durationSec));
   }, [snapshot?.durationSec]);
   const selected = snapshot?.answers ?? [];
+  const preloadedImageUrls = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    for (const menu of selected) {
+      if (!menu.imageUrl || preloadedImageUrls.current.has(menu.imageUrl))
+        continue;
+      preloadedImageUrls.current.add(menu.imageUrl);
+      const img = new Image();
+      img.src = menu.imageUrl;
+    }
+  }, [selected]);
   const results = snapshot?.results ?? [];
   const allRevealed =
     snapshot?.phase === "revealed" &&
