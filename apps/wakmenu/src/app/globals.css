@@ -15,3 +15,12 @@
 .donation-banner-thumb{width:42px;height:42px;object-fit:cover;border:2px solid #2d362e;border-radius:10px;margin:0 4px;vertical-align:middle}
 @keyframes donation-pop{0%{opacity:0;transform:translateX(-50%) scale(.7) translateY(-14px)}60%{opacity:1;transform:translateX(-50%) scale(1.05) translateY(0)}100%{opacity:1;transform:translateX(-50%) scale(1) translateY(0)}}
 @media(max-width:620px){.donation-banner{padding:10px 18px 10px 10px;gap:10px}.donation-banner-badge{width:36px;height:36px}.donation-banner p{font-size:1.3rem}.donation-banner-thumb{width:32px;height:32px}}
+
+.notice-backdrop{position:fixed;inset:0;z-index:50;background:rgba(41,49,37,.6);display:flex;justify-content:center;align-items:flex-start;padding:64px 20px;overflow-y:auto}
+.notice-modal{position:relative;width:min(728px,100%);background:#fff9e9;border:3px solid #2d362e;border-radius:24px;box-shadow:9px 9px #ffd65a;padding:38px 32px 26px;text-align:center;animation:pop .35s both}
+.notice-close{position:absolute;top:12px;right:14px;border:0;background:none;cursor:pointer;color:#796e55;padding:4px;display:flex}
+.notice-modal h2{font:3.1rem 'Do Hyeon',sans-serif;margin:4px 0 22px;color:#293125}
+.notice-body{margin-bottom:16px}
+.notice-body img{width:100%;display:block;border:2px solid #2d362e;border-radius:16px}
+.notice-dismiss{border:0;background:none;color:#84785f;text-decoration:underline;cursor:pointer;font-size:.85rem;padding:4px}
+@media(max-width:620px){.notice-backdrop{padding:34px 14px}.notice-modal{padding:26px 20px 20px}.notice-modal h2{font-size:2.4rem}}
