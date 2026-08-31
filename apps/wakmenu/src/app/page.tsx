@@ -432,7 +432,7 @@ export default function WakmenuPage() {
             우왁굳의 <em>밥</em>을 맞춰라!
           </h1>
           <p className="subtitle">
-            팬치분들는 <code>!밥 메뉴명</code>으로 정답을 외쳐주세요.
+            팬치분들은 <code>!밥 메뉴명</code>으로 정답을 외쳐주세요.
           </p>
         </div>
         <div className="wakdu-frame">
