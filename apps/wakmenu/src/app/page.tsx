@@ -30,6 +30,7 @@ import { AmbientBgm } from "@/components/ambient-bgm";
 import { AutoRehearsalFeed } from "@/components/auto-rehearsal-feed";
 import { BgmPlayer } from "@/components/bgm-player";
 import { DonationSubmissionBanner } from "@/components/donation-submission-banner";
+import { LastSeenTimer } from "@/components/last-seen-timer";
 import { NoticeModal } from "@/components/notice-modal";
 import { FOOD_CATALOG } from "@/lib/catalog";
 import { eulOrReul } from "@/lib/korean";
@@ -412,6 +413,7 @@ export default function WakmenuPage() {
     <main className="page-shell">
       <NoticeModal noticeId="comeback-2026-08" title="형, 이제야 이쪽을 보는구나">
         <img src={`${BASE}/comeback.webp`} alt="컴백 안내" />
+        <LastSeenTimer />
       </NoticeModal>
       <audio ref={completeAudio} src={`${BASE}/complete.mp3`} preload="auto" />
       <audio ref={endingAudio} src={`${BASE}/ending.mp3`} preload="auto" />

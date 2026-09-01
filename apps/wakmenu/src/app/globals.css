@@ -23,4 +23,6 @@
 .notice-body{margin-bottom:16px}
 .notice-body img{width:100%;display:block;border:2px solid #2d362e;border-radius:16px}
 .notice-dismiss{border:0;background:none;color:#84785f;text-decoration:underline;cursor:pointer;font-size:.85rem;padding:4px}
-@media(max-width:620px){.notice-backdrop{padding:34px 14px}.notice-modal{padding:26px 20px 20px}.notice-modal h2{font-size:2.4rem}}
+.last-seen-timer{margin:14px auto 0;display:flex;flex-direction:column;gap:4px;align-items:center;width:fit-content;background:#fff;border:2px solid #2d362e;border-radius:16px;padding:10px 20px;font-size:.85rem;font-weight:bold;color:#796e55;box-shadow:3px 3px #ffd65a}
+.last-seen-timer strong{font:1.5rem 'Do Hyeon',sans-serif;color:#e76155;font-weight:normal;font-variant-numeric:tabular-nums}
+@media(max-width:620px){.notice-backdrop{padding:34px 14px}.notice-modal{padding:26px 20px 20px}.notice-modal h2{font-size:2.4rem}.last-seen-timer{padding:8px 14px}.last-seen-timer strong{font-size:1.25rem}}
