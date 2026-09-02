@@ -19,6 +19,7 @@ SOOP(숲)과 치지직 방송 컨텐츠를 만들기 위한 pnpm 워크스페이
 | `@stream/live` | 방송 시작/종료 폴링 모니터 · uptime |
 | `@stream/goals` | 후원/구독/메시지 목표 트래커 |
 | `@stream/poll` | 채팅 투표 · 추첨 |
+| `@stream/sentence` | 채팅 이어말하기 헤드리스 엔진 · 섹션(누가/어디서/…)별 응모 집계, 가중 추첨, 완성 문장 히스토리 |
 | `@stream/tts` | 알림 TTS 어댑터 (provider 주입) |
 | `@stream/analytics` | 채팅·후원 집계 스냅샷 |
 | `@stream/scheduler` | 방송 일정 · webhook outbox |
@@ -27,8 +28,13 @@ SOOP(숲)과 치지직 방송 컨텐츠를 만들기 위한 pnpm 워크스페이
 | `@stream/overlay` | OBS Browser Source용 오버레이 위젯 |
 | `@stream/ui` | shadcn 스타일 UI + 치지직·SOOP 브랜드 로그인 버튼 |
 | `@stream/roulette` | 후원 → 아이템 자동 등록, 가중치 추첨, 히스토리/되돌리기 헤드리스 룰렛 엔진 |
+| `@stream/wakmenu` | 채팅 정답(메뉴) 맞히기 헤드리스 엔진 · 접수/마감/공개 페이즈, 별칭 매칭, 후원 특수 응모, 오답 집계 |
 | `apps/demo` | OAuth 로그인 · 채널 조회 · 채팅 검증용 Next.js 데모 |
 | `apps/roulette` | 후원 랜덤 룰렛 조작 페이지 + OBS 투명 오버레이 (Next.js, 포트 3001) |
+| `apps/poll` | 채팅 실시간 투표 조작 페이지 + 오버레이 (Next.js) |
+| `apps/sentence` | 채팅 이어말하기 조작 페이지 + 오버레이 (Next.js) |
+| `apps/wakmenu` | 방송용 메뉴 맞히기 게임 조작 페이지 + 오버레이 (Next.js, 포트 3004) |
+| `apps/chat-proxy` | EC2에서 도는 채팅 SSE 프록시 서버 |
 
 ```
 유저 OAuth 로그인  →  @stream/auth
@@ -220,6 +226,7 @@ Private. 비공식 API 사용은 각 플랫폼 이용약관을 확인한 뒤 본
 | 후원 랜덤 룰렛 | SOOP · 치지직 후원으로 아이템이 등록되는 방송용 랜덤 룰렛. 조작 페이지와 OBS 투명 오버레이 포함. | [/roulette/](https://streamcontent.click/roulette/) | [/stream/roulette/](https://gwanguian.github.io/stream/roulette/) |
 | 채팅 투표 | SOOP · 치지직 채팅(`!투표 N`)으로 진행하는 방송용 실시간 투표. 타이머·결과 공개·오버레이 포함. | [/poll/](https://streamcontent.click/poll/) | [/stream/poll/](https://gwanguian.github.io/stream/poll/) |
 | 이어말하기 | 채팅으로 문장을 이어가는 방송용 컨텐츠. | [/sentence/](https://streamcontent.click/sentence/) | [/stream/sentence/](https://gwanguian.github.io/stream/sentence/) |
+| 메뉴 맞히기 | 채팅으로 오늘의 메뉴를 맞히는 방송용 게임. 접수 타이머·후원 특수 응모·오답 집계·정답 공개 연출 포함. | [/wakmenu/](https://streamcontent.click/wakmenu/) | [/stream/wakmenu/](https://gwanguian.github.io/stream/wakmenu/) |
 
 > Pages는 Settings → Pages → Source를 **GitHub Actions**로 켠 뒤 `main` 푸시 시 배포됩니다. AWS는 `.github/workflows/aws-static.yml`이 같은 푸시에서 OIDC로 S3에 sync 합니다. 라이브 채팅은 EC2 프록시 [`https://chat.streamcontent.click/api/chat`](https://chat.streamcontent.click/api/chat)를 CI가 `NEXT_PUBLIC_CHAT_SSE_BASE`로 주입합니다. 계정 월 비용이 **$20**에 도달하면 AWS Budgets가 프록시 EC2를 자동 중지합니다(재기동은 [`infra/README.md`](infra/README.md)).
 >
