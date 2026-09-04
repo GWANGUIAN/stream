@@ -36,6 +36,9 @@ export const metadata: Metadata = {
   icons: {
     icon: [{ url: withBasePath('/favicon.ico') }],
   },
+  other: {
+    'google-adsense-account': 'ca-pub-2941605563798614',
+  },
 }
 
 export default function ConsoleLayout({ children }: { children: ReactNode }) {

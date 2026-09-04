@@ -1,6 +1,6 @@
 'use client'
 
-import { createScheduleFlush, type Platform } from '@stream/core'
+import { createScheduleFlush, getLastConnection, type Platform } from '@stream/core'
 import { createEventBus, type EventBus } from '@stream/events'
 import { SentenceEngine, type SentenceSnapshot } from '@stream/sentence'
 import type { ChatSseClientEvent } from '@stream/sse/client'
@@ -73,6 +73,11 @@ export class SentenceStore {
     const persisted = loadPersisted()
     if (persisted?.sentence) this.engine.loadSnapshot(persisted.sentence)
     if (persisted?.connection) this.connection = persisted.connection
+    else {
+      // 이 앱에서 연동한 적이 없으면 다른 방송 도구에서 마지막으로 연동한 채널을 이어받습니다.
+      const last = getLastConnection()
+      if (last) this.connection = last
+    }
 
     this.bus = createEventBus()
     this.engine.attachEventBus(this.bus)

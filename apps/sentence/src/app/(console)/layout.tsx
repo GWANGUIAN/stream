@@ -30,6 +30,9 @@ export const metadata: Metadata = {
   title: '랜덤 문장 만들기',
   description: '채팅으로 누가·어디서·어떻게·무엇을·왜를 모아 랜덤 문장을 만드는 방송용 툴',
   applicationName: '랜덤 문장 만들기',
+  other: {
+    'google-adsense-account': 'ca-pub-2941605563798614',
+  },
 }
 
 export const viewport: Viewport = {

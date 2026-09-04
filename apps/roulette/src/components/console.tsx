@@ -1,6 +1,8 @@
 'use client'
 
+import { PLATFORM_LABELS } from '@stream/core'
 import type { ChatSseClientEvent } from '@stream/sse/client'
+import { Home } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useChatConnection, useRouletteStore } from '@/lib/hooks'
 import { HistoryPanel } from './history-panel'
@@ -31,6 +33,12 @@ export function Console() {
   const handleSpin = useCallback(() => {
     store?.engine.spin()
   }, [store])
+
+  const knownStreamerId = snapshot?.streamerId?.trim()
+  const handleQuickConnect = useCallback(() => {
+    if (!snapshot?.streamerId) return
+    connection.connect(snapshot.platform, snapshot.streamerId)
+  }, [connection, snapshot?.platform, snapshot?.streamerId])
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -80,6 +88,9 @@ export function Console() {
     <div className="console-page">
       <header className="console-header">
         <div className="header-left">
+          <a href="../" className="btn btn-icon btn-ghost" aria-label="stream 홈으로">
+            <Home size={16} />
+          </a>
           <button
             type="button"
             className="btn btn-icon btn-ghost"
@@ -98,7 +109,23 @@ export function Console() {
       <TitleBar title={snapshot.title} onChange={(title) => store.engine.setTitle(title)} />
       <TimerDisplay store={store} timer={snapshot.timer} />
 
-      {!connected ? (
+      {!connected && knownStreamerId ? (
+        <button
+          type="button"
+          className="instruction-card instruction-card-action"
+          onClick={handleQuickConnect}
+          disabled={connection.status === 'connecting'}
+        >
+          <span className="instruction-text">
+            {connection.status === 'connecting'
+              ? `${PLATFORM_LABELS[snapshot.platform]} · ${knownStreamerId}에 연결하는 중…`
+              : connection.status === 'error'
+                ? connection.message || '연결에 실패했어요. 탭해서 다시 시도해 주세요.'
+                : `이전에 연동한 채널: ${PLATFORM_LABELS[snapshot.platform]} · ${knownStreamerId}`}
+          </span>
+          <span className="btn btn-sm btn-secondary">연동하기</span>
+        </button>
+      ) : !connected ? (
         <button
           type="button"
           className="instruction-card instruction-card-action"

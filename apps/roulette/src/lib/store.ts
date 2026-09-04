@@ -1,6 +1,6 @@
 'use client'
 
-import { createScheduleFlush } from '@stream/core'
+import { createScheduleFlush, getLastConnection } from '@stream/core'
 import { createEventBus, type EventBus } from '@stream/events'
 import { RouletteEngine, type RouletteSnapshot } from '@stream/roulette'
 import type { ChatSseClientEvent } from '@stream/sse/client'
@@ -43,6 +43,11 @@ export class RouletteStore {
     this.engine = new RouletteEngine()
     const persisted = loadPersisted()
     if (persisted) this.engine.loadSnapshot(persisted)
+    if (!persisted?.streamerId) {
+      // 이 앱에서 연동한 적이 없으면 다른 방송 도구에서 마지막으로 연동한 채널을 이어받습니다.
+      const last = getLastConnection()
+      if (last) this.engine.setSource(last.platform, last.streamerId)
+    }
 
     this.bus = createEventBus()
     this.engine.attachEventBus(this.bus)

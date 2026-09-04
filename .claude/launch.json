@@ -6,6 +6,12 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@stream/wakmenu-app", "run", "dev"],
       "port": 3004
+    },
+    {
+      "name": "roulette",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@stream/roulette-app", "run", "dev"],
+      "port": 3001
     }
   ]
 }

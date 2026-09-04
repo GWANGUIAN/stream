@@ -36,6 +36,11 @@ const REPO_ISSUES_URL = 'https://github.com/GWANGUIAN/stream/issues'
 const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID ?? ''
 const ADSENSE_SLOT = process.env.NEXT_PUBLIC_ADSENSE_SLOT ?? ''
 
+// 애드센스 사이트 소유 확인용 메타 태그. 광고 스크립트/영역과 달리 심사 이전에도
+// 항상 노출되어야 하므로 env var 게이팅 없이 고정으로 넣습니다.
+const ADSENSE_ACCOUNT_META =
+  '<meta name="google-adsense-account" content="ca-pub-2941605563798614" />'
+
 const escapeHtml = (value) =>
   String(value).replace(/[&<>"']/g, (char) => {
     const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }
@@ -253,6 +258,7 @@ const pageShell = ({
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+${ADSENSE_ACCOUNT_META}
 ${renderMeta({ title, description, urlPath })}
 <link rel="icon" href="${rel(depth, 'favicon.ico')}" type="image/x-icon" />
 <style>${SHARED_STYLES}</style>${adHeadScript}
@@ -286,7 +292,7 @@ const cards = apps
 
 const homeBody = `<main>
   <h1>stream<span>.</span></h1>
-  <p class="lead">SOOP · 치지직 방송인을 위한 무료 오버레이 도구 모음입니다. 회원가입이나 설치 없이 브라우저에서 바로 조작 화면을 열고, OBS 브라우저 소스에 오버레이 주소를 붙여 넣으면 방송에서 바로 쓸 수 있습니다.</p>
+  <p class="lead">SOOP · 치지직 방송인을 위한 무료 채팅 연동 도구 모음입니다. 회원가입이나 설치 없이 브라우저에서 바로 조작 화면을 열고 채널만 연결하면, 시청자 채팅과 실시간으로 상호작용하는 콘텐츠를 방송에 바로 쓸 수 있습니다.</p>
   <nav class="list" aria-label="방송 도구 목록">${cards}
   </nav>${adSlotHtml('ad-slot-home')}${footerNav(0, null)}
 </main>`
@@ -296,7 +302,7 @@ writeFileSync(
   pageShell({
     title: 'stream — SOOP·치지직 방송 도구 모음',
     description:
-      'SOOP · 치지직 방송용 무료 오버레이 도구 모음. 후원 랜덤 룰렛, 채팅 투표, 랜덤 문장 만들기.',
+      'SOOP · 치지직 방송용 무료 채팅 연동 도구 모음. 후원 랜덤 룰렛, 채팅 투표, 랜덤 문장 만들기.',
     urlPath: '/',
     depth: 0,
     bodyHtml: homeBody,
@@ -307,7 +313,7 @@ writeFileSync(
       name: 'stream',
       url: SITE_URL,
       description:
-        'SOOP · 치지직 방송용 오버레이 도구 모음 — 후원 랜덤 룰렛, 채팅 투표, 랜덤 문장 만들기',
+        'SOOP · 치지직 방송용 채팅 연동 도구 모음 — 후원 랜덤 룰렛, 채팅 투표, 랜덤 문장 만들기',
       inLanguage: 'ko',
     },
   }),
@@ -321,14 +327,13 @@ const aboutBody = `<main class="content">
   <a class="back-link" href="../">&larr; 홈으로</a>
   <article>
     <h1>stream 소개</h1>
-    <p class="meta">SOOP(숲) · 치지직 방송인을 위한 무료 오버레이 도구 모음</p>
+    <p class="meta">SOOP(숲) · 치지직 방송인을 위한 무료 채팅 연동 도구 모음</p>
 
     <p>
       stream은 SOOP(구 아프리카TV)과 치지직에서 방송하는 스트리머가 시청자 채팅과
       상호작용하는 연출을 쉽게 넣을 수 있도록 만든 개인 오픈소스 프로젝트입니다.
-      회원가입이나 별도 프로그램 설치 없이, 브라우저에서 조작 페이지를 열고
-      OBS 등 방송 프로그램의 "브라우저 소스"에 오버레이 주소를 붙여 넣기만 하면
-      바로 방송 화면에 반영됩니다. 채팅 연동은 치지직/SOOP 공식·비공식 API를 통해
+      회원가입이나 별도 프로그램 설치 없이 브라우저에서 조작 페이지를 열고 채널 ID만
+      연결하면 바로 사용할 수 있습니다. 채팅 연동은 치지직/SOOP 공식·비공식 API를 통해
       실시간으로 이루어지며, 시청자는 평소처럼 채팅을 치는 것만으로 참여할 수 있습니다.
     </p>
 
@@ -337,8 +342,7 @@ const aboutBody = `<main class="content">
       후원(도네이션)이 들어올 때마다 후원 메시지나 후원자가 지정한 항목이 자동으로
       룰렛 아이템으로 등록되는 방송용 추첨 도구입니다. 조작 페이지에서 방송 플랫폼과
       채널을 연결하고, 후원 금액 단위당 등록 방식과 접수 시간을 설정한 뒤, 스페이스바로
-      룰렛을 돌립니다. 오버레이 페이지는 투명 배경으로 제공되어 OBS 브라우저 소스에
-      그대로 얹으면 방송 화면에 룰렛판과 최근 등록 토스트만 표시됩니다.
+      룰렛을 돌립니다. 등록된 아이템과 당첨 결과는 화면에 바로 표시됩니다.
     </p>
     <ul>
       <li>단축키: <code>Space</code> 스핀 · <code>T</code> 접수 타이머 시작/정지 · <code>H</code> 히스토리 열기</li>
@@ -385,7 +389,7 @@ writeFileSync(
   pageShell({
     title: 'stream 소개 — SOOP·치지직 방송 도구 모음',
     description:
-      'SOOP·치지직 방송용 후원 랜덤 룰렛·채팅 투표·랜덤 문장 만들기 사용법과 오버레이 연동 방법을 소개합니다.',
+      'SOOP·치지직 방송용 후원 랜덤 룰렛·채팅 투표·랜덤 문장 만들기 사용법과 채팅 연동 방법을 소개합니다.',
     urlPath: '/about/',
     depth: 1,
     bodyHtml: aboutBody,
@@ -402,7 +406,7 @@ const privacyBody = `<main class="content">
     <h1>개인정보처리방침</h1>
     <p class="meta">시행일자: 2026년 9월 4일</p>
 
-    <p>stream(이하 "이 사이트")은 SOOP·치지직 방송인을 위한 무료 오버레이 도구
+    <p>stream(이하 "이 사이트")은 SOOP·치지직 방송인을 위한 무료 채팅 연동 도구
       모음이며, 아래와 같이 개인정보를 처리합니다.</p>
 
     <h2>1. 수집하는 정보</h2>
@@ -462,13 +466,13 @@ const termsBody = `<main class="content">
     <p class="meta">시행일자: 2026년 9월 4일</p>
 
     <h2>제1조 (목적)</h2>
-    <p>이 약관은 stream(이하 "이 사이트")이 제공하는 방송용 오버레이 도구의
+    <p>이 약관은 stream(이하 "이 사이트")이 제공하는 방송용 채팅 연동 도구의
       이용 조건과 절차, 이용자와 운영자의 권리·의무를 규정합니다.</p>
 
     <h2>제2조 (서비스 설명)</h2>
     <p>이 사이트는 개인이 무료로 제작·배포하는 오픈소스 프로젝트이며, SOOP·치지직
-      방송에서 활용할 수 있는 후원 랜덤 룰렛, 채팅 투표, 랜덤 문장 만들기 등의
-      조작 페이지와 OBS 오버레이 페이지를 제공합니다.</p>
+      방송에서 시청자 채팅과 상호작용할 수 있는 후원 랜덤 룰렛, 채팅 투표,
+      랜덤 문장 만들기 등의 조작 페이지를 제공합니다.</p>
 
     <h2>제3조 (이용자의 의무)</h2>
     <p>이용자는 이 사이트의 도구를 통해 치지직·SOOP에서 방송을 진행할 때 각

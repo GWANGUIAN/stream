@@ -1,6 +1,6 @@
 'use client'
 
-import type { Platform } from '@stream/core'
+import { type Platform, setLastConnection } from '@stream/core'
 import type { RouletteSnapshot } from '@stream/roulette'
 import {
   type ChatSseClientEvent,
@@ -96,6 +96,7 @@ export function useChatConnection(
       setMessage('스트리머 아이디를 입력하세요.')
       return
     }
+    setLastConnection(platform, id)
 
     if (!CHAT_SSE_BASE && IS_STATIC_EXPORT) {
       setStatus('error')

@@ -30,6 +30,9 @@ export const metadata: Metadata = {
   title: '채팅 투표',
   description: 'SOOP · 치지직 채팅으로 진행하는 방송용 실시간 투표',
   applicationName: '채팅 투표',
+  other: {
+    'google-adsense-account': 'ca-pub-2941605563798614',
+  },
 }
 
 export const viewport: Viewport = {

@@ -1,7 +1,8 @@
 'use client'
 
+import { PLATFORM_LABELS } from '@stream/core'
 import type { ChatSseClientEvent } from '@stream/sse/client'
-import { Check, Copy, History, Menu } from 'lucide-react'
+import { Check, Copy, History, Home, Menu } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useChatConnection, usePollStore } from '@/lib/hooks'
 import { playRevealFanfare } from '@/lib/sound'
@@ -32,6 +33,11 @@ export function Console() {
     prefixes: [votePrefix],
   })
   const connected = connection.status === 'connected'
+  const knownStreamerId = snapshot?.streamerId?.trim()
+  const handleQuickConnect = useCallback(() => {
+    if (!snapshot?.streamerId) return
+    connection.connect(snapshot.platform, snapshot.streamerId)
+  }, [connection, snapshot?.platform, snapshot?.streamerId])
 
   const handlePrimaryAction = useCallback(() => {
     if (!store || !snapshot) return
@@ -102,6 +108,9 @@ export function Console() {
     <div className="console-page">
       <header className="console-header">
         <div className="header-left">
+          <a href="../" className="btn btn-icon btn-ghost" aria-label="stream 홈으로">
+            <Home size={16} />
+          </a>
           <button
             type="button"
             className="btn btn-icon btn-ghost"
@@ -152,6 +161,22 @@ export function Console() {
             {copied ? '복사됨' : '안내 문구 복사'}
           </button>
         </div>
+      ) : knownStreamerId ? (
+        <button
+          type="button"
+          className="instruction-card instruction-card-action"
+          onClick={handleQuickConnect}
+          disabled={connection.status === 'connecting'}
+        >
+          <span className="instruction-text">
+            {connection.status === 'connecting'
+              ? `${PLATFORM_LABELS[snapshot.platform]} · ${knownStreamerId}에 연결하는 중…`
+              : connection.status === 'error'
+                ? connection.message || '연결에 실패했어요. 탭해서 다시 시도해 주세요.'
+                : `이전에 연동한 채널: ${PLATFORM_LABELS[snapshot.platform]} · ${knownStreamerId}`}
+          </span>
+          <span className="btn btn-sm btn-secondary">연동하기</span>
+        </button>
       ) : (
         <button
           type="button"
