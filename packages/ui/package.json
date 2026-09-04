@@ -6,7 +6,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./styles.css": "./src/styles/globals.css",
-    "./brand": "./src/brand/index.ts"
+    "./brand": "./src/brand/index.ts",
+    "./ads": "./src/ads/ad-slot.tsx"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

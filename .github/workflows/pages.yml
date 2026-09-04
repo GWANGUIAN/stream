@@ -43,6 +43,8 @@ jobs:
         env:
           NEXT_PUBLIC_BASE_PATH: /stream/roulette
           NEXT_PUBLIC_CHAT_SSE_BASE: https://chat.streamcontent.click/api/chat
+          NEXT_PUBLIC_ADSENSE_CLIENT_ID: ${{ vars.ADSENSE_CLIENT_ID }}
+          NEXT_PUBLIC_ADSENSE_SLOT: ${{ vars.ADSENSE_SLOT }}
         run: pnpm run build:pages
 
       - name: Build poll (static export)
@@ -50,6 +52,8 @@ jobs:
         env:
           NEXT_PUBLIC_BASE_PATH: /stream/poll
           NEXT_PUBLIC_CHAT_SSE_BASE: https://chat.streamcontent.click/api/chat
+          NEXT_PUBLIC_ADSENSE_CLIENT_ID: ${{ vars.ADSENSE_CLIENT_ID }}
+          NEXT_PUBLIC_ADSENSE_SLOT: ${{ vars.ADSENSE_SLOT }}
         run: pnpm run build:pages
 
       - name: Build sentence (static export)
@@ -57,6 +61,8 @@ jobs:
         env:
           NEXT_PUBLIC_BASE_PATH: /stream/sentence
           NEXT_PUBLIC_CHAT_SSE_BASE: https://chat.streamcontent.click/api/chat
+          NEXT_PUBLIC_ADSENSE_CLIENT_ID: ${{ vars.ADSENSE_CLIENT_ID }}
+          NEXT_PUBLIC_ADSENSE_SLOT: ${{ vars.ADSENSE_SLOT }}
         run: pnpm run build:pages
 
       # 랜딩(apps.json)에는 올리지 않는 내부 검증용 앱
@@ -68,6 +74,9 @@ jobs:
         run: pnpm run build:pages
 
       - name: Assemble Pages site
+        env:
+          NEXT_PUBLIC_ADSENSE_CLIENT_ID: ${{ vars.ADSENSE_CLIENT_ID }}
+          NEXT_PUBLIC_ADSENSE_SLOT: ${{ vars.ADSENSE_SLOT }}
         run: |
           mkdir -p _site
           # underscore 경로(_next 등)가 Jekyll에 의해 무시되지 않도록 합니다.

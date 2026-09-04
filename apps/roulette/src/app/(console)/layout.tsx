@@ -1,3 +1,4 @@
+import { AdSenseScript, AdSlot } from '@stream/ui'
 import type { Metadata } from 'next'
 import { Black_Han_Sans, JetBrains_Mono, Noto_Sans_KR } from 'next/font/google'
 import type { ReactNode } from 'react'
@@ -46,8 +47,12 @@ export default function ConsoleLayout({ children }: { children: ReactNode }) {
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <AdSenseScript />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <AdSlot className="mx-auto my-4 max-w-3xl" />
+      </body>
     </html>
   )
 }

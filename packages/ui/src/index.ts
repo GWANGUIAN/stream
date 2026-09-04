@@ -1,3 +1,4 @@
+export { AdSenseScript, AdSlot, type AdSlotProps } from './ads/ad-slot'
 export { ChzzkLoginButton, type ChzzkLoginButtonProps } from './auth/chzzk-login-button'
 export {
   PlatformLoginButton,

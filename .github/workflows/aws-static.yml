@@ -45,6 +45,8 @@ jobs:
         env:
           NEXT_PUBLIC_BASE_PATH: /roulette
           NEXT_PUBLIC_CHAT_SSE_BASE: https://chat.streamcontent.click/api/chat
+          NEXT_PUBLIC_ADSENSE_CLIENT_ID: ${{ vars.ADSENSE_CLIENT_ID }}
+          NEXT_PUBLIC_ADSENSE_SLOT: ${{ vars.ADSENSE_SLOT }}
         run: pnpm run build:pages
 
       - name: Build poll (static export)
@@ -52,6 +54,8 @@ jobs:
         env:
           NEXT_PUBLIC_BASE_PATH: /poll
           NEXT_PUBLIC_CHAT_SSE_BASE: https://chat.streamcontent.click/api/chat
+          NEXT_PUBLIC_ADSENSE_CLIENT_ID: ${{ vars.ADSENSE_CLIENT_ID }}
+          NEXT_PUBLIC_ADSENSE_SLOT: ${{ vars.ADSENSE_SLOT }}
         run: pnpm run build:pages
 
       - name: Build sentence (static export)
@@ -59,6 +63,8 @@ jobs:
         env:
           NEXT_PUBLIC_BASE_PATH: /sentence
           NEXT_PUBLIC_CHAT_SSE_BASE: https://chat.streamcontent.click/api/chat
+          NEXT_PUBLIC_ADSENSE_CLIENT_ID: ${{ vars.ADSENSE_CLIENT_ID }}
+          NEXT_PUBLIC_ADSENSE_SLOT: ${{ vars.ADSENSE_SLOT }}
         run: pnpm run build:pages
 
       # 우왁굳 전용 게임: 랜딩에는 노출하지 않고 고정 경로로만 배포합니다.
@@ -78,6 +84,9 @@ jobs:
         run: pnpm run build:pages
 
       - name: Assemble site
+        env:
+          NEXT_PUBLIC_ADSENSE_CLIENT_ID: ${{ vars.ADSENSE_CLIENT_ID }}
+          NEXT_PUBLIC_ADSENSE_SLOT: ${{ vars.ADSENSE_SLOT }}
         run: |
           mkdir -p _site
           cp -r apps/roulette/out _site/roulette
