@@ -41,6 +41,10 @@ const ADSENSE_SLOT = process.env.NEXT_PUBLIC_ADSENSE_SLOT ?? ''
 const ADSENSE_PUBLISHER_ID = 'pub-2941605563798614'
 const ADSENSE_ACCOUNT_META = `<meta name="google-adsense-account" content="ca-${ADSENSE_PUBLISHER_ID}" />`
 
+// 네이버 서치어드바이저 사이트 소유 확인용 메타 태그.
+const NAVER_SITE_VERIFICATION_META =
+  '<meta name="naver-site-verification" content="c49084db4ba89efa1b92be0ea31a2878d5be0eff" />'
+
 const escapeHtml = (value) =>
   String(value).replace(/[&<>"']/g, (char) => {
     const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }
@@ -259,6 +263,7 @@ const pageShell = ({
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 ${ADSENSE_ACCOUNT_META}
+${NAVER_SITE_VERIFICATION_META}
 ${renderMeta({ title, description, urlPath })}
 <link rel="icon" href="${rel(depth, 'favicon.ico')}" type="image/x-icon" />
 <style>${SHARED_STYLES}</style>${adHeadScript}

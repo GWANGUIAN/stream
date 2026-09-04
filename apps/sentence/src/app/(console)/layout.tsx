@@ -32,6 +32,7 @@ export const metadata: Metadata = {
   applicationName: '랜덤 문장 만들기',
   other: {
     'google-adsense-account': 'ca-pub-2941605563798614',
+    'naver-site-verification': 'c49084db4ba89efa1b92be0ea31a2878d5be0eff',
   },
 }
 
