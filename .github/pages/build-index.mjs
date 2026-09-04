@@ -36,10 +36,10 @@ const REPO_ISSUES_URL = 'https://github.com/GWANGUIAN/stream/issues'
 const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID ?? ''
 const ADSENSE_SLOT = process.env.NEXT_PUBLIC_ADSENSE_SLOT ?? ''
 
-// 애드센스 사이트 소유 확인용 메타 태그. 광고 스크립트/영역과 달리 심사 이전에도
-// 항상 노출되어야 하므로 env var 게이팅 없이 고정으로 넣습니다.
-const ADSENSE_ACCOUNT_META =
-  '<meta name="google-adsense-account" content="ca-pub-2941605563798614" />'
+// 애드센스 게시자 ID(고정값). 사이트 소유 확인 메타 태그와 ads.txt는 광고
+// 스크립트/영역과 달리 심사 이전에도 항상 노출되어야 하므로 env var 게이팅 없이 씁니다.
+const ADSENSE_PUBLISHER_ID = 'pub-2941605563798614'
+const ADSENSE_ACCOUNT_META = `<meta name="google-adsense-account" content="ca-${ADSENSE_PUBLISHER_ID}" />`
 
 const escapeHtml = (value) =>
   String(value).replace(/[&<>"']/g, (char) => {
@@ -539,11 +539,11 @@ Sitemap: ${SITE_URL}/sitemap.xml
 `
 writeFileSync(path.join(outDir, 'robots.txt'), robotsTxt)
 
-if (ADSENSE_CLIENT_ID) {
-  const pubId = ADSENSE_CLIENT_ID.replace(/^ca-/, '')
-  writeFileSync(path.join(outDir, 'ads.txt'), `google.com, ${pubId}, DIRECT, f08c47fec0942fa0\n`)
-}
+writeFileSync(
+  path.join(outDir, 'ads.txt'),
+  `google.com, ${ADSENSE_PUBLISHER_ID}, DIRECT, f08c47fec0942fa0\n`,
+)
 
 console.log(
-  `[build-index] ${apps.length}개 앱 + 소개/개인정보처리방침/이용약관 + sitemap/robots${ADSENSE_CLIENT_ID ? '/ads.txt' : ''} 생성 → ${outDir}`,
+  `[build-index] ${apps.length}개 앱 + 소개/개인정보처리방침/이용약관 + sitemap/robots/ads.txt 생성 → ${outDir}`,
 )
